@@ -9,14 +9,26 @@ import Landing from "./pages/landing";
 import Home from "./pages/home";
 import Timeline from "./pages/timeline";
 import Profile from "./pages/profile";
+import AuthPage from "./pages/auth";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
+      {!isAuthenticated ? (
+        <>
+          <Route path="/" component={Landing} />
+          <Route path="/auth" component={AuthPage} />
+        </>
       ) : (
         <>
           <Route path="/" component={Home} />

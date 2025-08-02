@@ -42,11 +42,11 @@ Preferred communication style: Simple, everyday language.
 - **Type Generation**: Drizzle generates TypeScript types from database schema
 - **Form Validation**: Client-side validation using React Hook Form with Zod resolvers
 
-### Authentication Flow
-- **OAuth Integration**: Replit OAuth with OIDC for secure authentication
-- **Session Persistence**: PostgreSQL-backed session storage with configurable TTL
+### Authentication Flow (Updated: August 2025)
+- **Supabase Authentication**: OTP/SMS-based authentication with phone number verification
+- **Session Management**: Supabase session handling with automatic token refresh
 - **Route Protection**: Authentication middleware protecting sensitive API endpoints
-- **User Context**: React context for managing authentication state across components
+- **User Context**: React Query for managing authentication state and user sessions
 
 ## External Dependencies
 
