@@ -2,7 +2,7 @@
 
 ## Overview
 
-MaternalCare is a full-stack pregnancy tracking application that enables expectant mothers to monitor their pregnancy journey through personalized timeline visualization, symptom logging, and mood monitoring. The application provides a comprehensive dashboard for tracking pregnancy milestones, logging daily symptoms and moods, and visualizing progress throughout the pregnancy.
+MaternalCare is a comprehensive clinical pregnancy tracking platform that enables expectant mothers, clinicians, and healthcare providers to monitor pregnancy journeys through advanced features including educational content delivery, community forums, secure messaging, and clinical-grade data tracking. The platform supports both patient self-monitoring and professional clinical oversight with features designed for high-risk pregnancy management.
 
 ## User Preferences
 
@@ -26,13 +26,14 @@ Preferred communication style: Simple, everyday language.
 - **Database ORM**: Drizzle ORM for type-safe database operations and schema management
 - **API Design**: RESTful endpoints with proper error handling and request/response validation
 
-### Database Schema Design
-- **Users Table**: Stores user authentication data (required for Replit Auth integration)
-- **Pregnancy Profiles**: Tracks pregnancy details including due date, current week, and baby information
-- **Symptom Logs**: Records daily symptoms with severity levels and detailed notes
-- **Mood Logs**: Captures daily mood tracking with emoji-based mood selection
-- **Weight Logs**: Monitors weight progression throughout pregnancy
-- **Pregnancy Milestones**: Tracks important pregnancy events and appointments
+### Database Schema Design (Updated: August 2025)
+- **Users Table**: Enhanced with clinician flags, phone numbers, profile completion status, and display names
+- **Pregnancy Profiles**: Tracks pregnancy details with high-risk flags stored as JSONB for flexible clinical data
+- **Symptom Logs**: JSONB-based symptom tracking with severity mapping and integrated mood scoring (1-10 scale)
+- **Educational Contents**: Week-based educational materials with readability levels (low/medium/high) and tag systems
+- **Forum Threads & Posts**: Community discussion platform with moderation flags and threaded conversations
+- **Messages**: Secure direct messaging between users with read receipts and content moderation
+- **Shared Summaries**: Secure token-based sharing system for pregnancy data with healthcare providers
 - **Sessions Table**: Manages user authentication sessions (required for Replit Auth)
 
 ### Data Validation and Type Safety

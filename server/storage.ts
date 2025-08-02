@@ -2,21 +2,27 @@ import {
   users,
   pregnancyProfiles,
   symptomLogs,
-  moodLogs,
-  weightLogs,
-  pregnancyMilestones,
+  educationalContents,
+  sharedSummaries,
+  forumThreads,
+  forumPosts,
+  messages,
   type User,
   type UpsertUser,
   type PregnancyProfile,
   type InsertPregnancyProfile,
   type SymptomLog,
   type InsertSymptomLog,
-  type MoodLog,
-  type InsertMoodLog,
-  type WeightLog,
-  type InsertWeightLog,
-  type PregnancyMilestone,
-  type InsertMilestone,
+  type EducationalContent,
+  type InsertEducationalContent,
+  type SharedSummary,
+  type InsertSharedSummary,
+  type ForumThread,
+  type InsertForumThread,
+  type ForumPost,
+  type InsertForumPost,
+  type Message,
+  type InsertMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -32,22 +38,30 @@ export interface IStorage {
   updatePregnancyProfile(id: string, updates: Partial<InsertPregnancyProfile>): Promise<PregnancyProfile>;
   
   // Symptom logging operations
-  getSymptomLogs(userId: string, pregnancyId: string, limit?: number): Promise<SymptomLog[]>;
+  getSymptomLogs(userId: string, limit?: number): Promise<SymptomLog[]>;
   createSymptomLog(log: InsertSymptomLog): Promise<SymptomLog>;
   
-  // Mood logging operations
-  getMoodLogs(userId: string, pregnancyId: string, limit?: number): Promise<MoodLog[]>;
-  createMoodLog(log: InsertMoodLog): Promise<MoodLog>;
-  getTodaysMoodLog(userId: string, pregnancyId: string): Promise<MoodLog | undefined>;
+  // Educational content operations
+  getEducationalContentByWeek(week: number, readabilityLevel?: string): Promise<EducationalContent[]>;
+  getAllEducationalContent(): Promise<EducationalContent[]>;
+  createEducationalContent(content: InsertEducationalContent): Promise<EducationalContent>;
   
-  // Weight logging operations
-  getWeightLogs(userId: string, pregnancyId: string, limit?: number): Promise<WeightLog[]>;
-  createWeightLog(log: InsertWeightLog): Promise<WeightLog>;
+  // Shared summaries operations
+  createSharedSummary(summary: InsertSharedSummary): Promise<SharedSummary>;
+  getSharedSummaryByToken(token: string): Promise<SharedSummary | undefined>;
   
-  // Milestone operations
-  getMilestones(userId: string, pregnancyId: string): Promise<PregnancyMilestone[]>;
-  createMilestone(milestone: InsertMilestone): Promise<PregnancyMilestone>;
-  updateMilestone(id: string, updates: Partial<InsertMilestone>): Promise<PregnancyMilestone>;
+  // Forum operations
+  getForumThreads(limit?: number): Promise<ForumThread[]>;
+  getForumThread(id: string): Promise<ForumThread | undefined>;
+  createForumThread(thread: InsertForumThread): Promise<ForumThread>;
+  getForumPosts(threadId: string): Promise<ForumPost[]>;
+  createForumPost(post: InsertForumPost): Promise<ForumPost>;
+  
+  // Messaging operations
+  getMessages(userId: string, limit?: number): Promise<Message[]>;
+  getConversation(userId: string, otherUserId: string): Promise<Message[]>;
+  createMessage(message: InsertMessage): Promise<Message>;
+  markMessageAsRead(messageId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -100,12 +114,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Symptom logging operations
-  async getSymptomLogs(userId: string, pregnancyId: string, limit = 10): Promise<SymptomLog[]> {
+  async getSymptomLogs(userId: string, limit = 10): Promise<SymptomLog[]> {
     return await db
       .select()
       .from(symptomLogs)
-      .where(and(eq(symptomLogs.userId, userId), eq(symptomLogs.pregnancyId, pregnancyId)))
-      .orderBy(desc(symptomLogs.loggedAt))
+      .where(eq(symptomLogs.userId, userId))
+      .orderBy(desc(symptomLogs.timestamp))
       .limit(limit);
   }
 
@@ -117,88 +131,133 @@ export class DatabaseStorage implements IStorage {
     return newLog;
   }
 
-  // Mood logging operations
-  async getMoodLogs(userId: string, pregnancyId: string, limit = 10): Promise<MoodLog[]> {
+  // Educational content operations
+  async getEducationalContentByWeek(week: number, readabilityLevel?: string): Promise<EducationalContent[]> {
+    let query = db
+      .select()
+      .from(educationalContents)
+      .where(eq(educationalContents.week, week));
+    
+    if (readabilityLevel) {
+      query = query.where(eq(educationalContents.readabilityLevel, readabilityLevel));
+    }
+    
+    return await query.orderBy(educationalContents.createdAt);
+  }
+
+  async getAllEducationalContent(): Promise<EducationalContent[]> {
     return await db
       .select()
-      .from(moodLogs)
-      .where(and(eq(moodLogs.userId, userId), eq(moodLogs.pregnancyId, pregnancyId)))
-      .orderBy(desc(moodLogs.loggedAt))
+      .from(educationalContents)
+      .orderBy(educationalContents.week, educationalContents.createdAt);
+  }
+
+  async createEducationalContent(content: InsertEducationalContent): Promise<EducationalContent> {
+    const [newContent] = await db
+      .insert(educationalContents)
+      .values(content)
+      .returning();
+    return newContent;
+  }
+
+  // Shared summaries operations
+  async createSharedSummary(summary: InsertSharedSummary): Promise<SharedSummary> {
+    const [newSummary] = await db
+      .insert(sharedSummaries)
+      .values(summary)
+      .returning();
+    return newSummary;
+  }
+
+  async getSharedSummaryByToken(token: string): Promise<SharedSummary | undefined> {
+    const [summary] = await db
+      .select()
+      .from(sharedSummaries)
+      .where(eq(sharedSummaries.token, token));
+    return summary;
+  }
+
+  // Forum operations
+  async getForumThreads(limit = 20): Promise<ForumThread[]> {
+    return await db
+      .select()
+      .from(forumThreads)
+      .where(eq(forumThreads.isFlagged, false))
+      .orderBy(desc(forumThreads.createdAt))
       .limit(limit);
   }
 
-  async createMoodLog(log: InsertMoodLog): Promise<MoodLog> {
-    const [newLog] = await db
-      .insert(moodLogs)
-      .values(log)
-      .returning();
-    return newLog;
+  async getForumThread(id: string): Promise<ForumThread | undefined> {
+    const [thread] = await db
+      .select()
+      .from(forumThreads)
+      .where(eq(forumThreads.id, id));
+    return thread;
   }
 
-  async getTodaysMoodLog(userId: string, pregnancyId: string): Promise<MoodLog | undefined> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+  async createForumThread(thread: InsertForumThread): Promise<ForumThread> {
+    const [newThread] = await db
+      .insert(forumThreads)
+      .values(thread)
+      .returning();
+    return newThread;
+  }
 
-    const [log] = await db
+  async getForumPosts(threadId: string): Promise<ForumPost[]> {
+    return await db
       .select()
-      .from(moodLogs)
+      .from(forumPosts)
+      .where(and(eq(forumPosts.threadId, threadId), eq(forumPosts.isFlagged, false)))
+      .orderBy(forumPosts.createdAt);
+  }
+
+  async createForumPost(post: InsertForumPost): Promise<ForumPost> {
+    const [newPost] = await db
+      .insert(forumPosts)
+      .values(post)
+      .returning();
+    return newPost;
+  }
+
+  // Messaging operations
+  async getMessages(userId: string, limit = 20): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .where(and(
+        eq(messages.toUser, userId),
+        eq(messages.isFlagged, false)
+      ))
+      .orderBy(desc(messages.createdAt))
+      .limit(limit);
+  }
+
+  async getConversation(userId: string, otherUserId: string): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
       .where(
         and(
-          eq(moodLogs.userId, userId),
-          eq(moodLogs.pregnancyId, pregnancyId),
-          // Note: This is a simplified check. In production, you'd want proper date range queries
+          eq(messages.isFlagged, false),
+          // Messages between the two users in either direction
         )
       )
-      .orderBy(desc(moodLogs.loggedAt))
-      .limit(1);
-    
-    return log;
+      .orderBy(messages.createdAt);
   }
 
-  // Weight logging operations
-  async getWeightLogs(userId: string, pregnancyId: string, limit = 10): Promise<WeightLog[]> {
-    return await db
-      .select()
-      .from(weightLogs)
-      .where(and(eq(weightLogs.userId, userId), eq(weightLogs.pregnancyId, pregnancyId)))
-      .orderBy(desc(weightLogs.loggedAt))
-      .limit(limit);
-  }
-
-  async createWeightLog(log: InsertWeightLog): Promise<WeightLog> {
-    const [newLog] = await db
-      .insert(weightLogs)
-      .values(log)
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db
+      .insert(messages)
+      .values(message)
       .returning();
-    return newLog;
+    return newMessage;
   }
 
-  // Milestone operations
-  async getMilestones(userId: string, pregnancyId: string): Promise<PregnancyMilestone[]> {
-    return await db
-      .select()
-      .from(pregnancyMilestones)
-      .where(and(eq(pregnancyMilestones.userId, userId), eq(pregnancyMilestones.pregnancyId, pregnancyId)))
-      .orderBy(pregnancyMilestones.week);
-  }
-
-  async createMilestone(milestone: InsertMilestone): Promise<PregnancyMilestone> {
-    const [newMilestone] = await db
-      .insert(pregnancyMilestones)
-      .values(milestone)
-      .returning();
-    return newMilestone;
-  }
-
-  async updateMilestone(id: string, updates: Partial<InsertMilestone>): Promise<PregnancyMilestone> {
-    const [updated] = await db
-      .update(pregnancyMilestones)
-      .set(updates)
-      .where(eq(pregnancyMilestones.id, id))
-      .returning();
-    return updated;
+  async markMessageAsRead(messageId: string): Promise<void> {
+    await db
+      .update(messages)
+      .set({ readAt: new Date() })
+      .where(eq(messages.id, messageId));
   }
 }
 

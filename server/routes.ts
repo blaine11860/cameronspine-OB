@@ -5,9 +5,10 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import {
   insertPregnancyProfileSchema,
   insertSymptomLogSchema,
-  insertMoodLogSchema,
-  insertWeightLogSchema,
-  insertMilestoneSchema,
+  insertEducationalContentSchema,
+  insertForumThreadSchema,
+  insertForumPostSchema,
+  insertMessageSchema,
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -44,18 +45,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const profileData = insertPregnancyProfileSchema.parse({
         ...req.body,
-        userId,
+        userId
       });
-      
       const profile = await storage.createPregnancyProfile(profileData);
       res.json(profile);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid pregnancy profile data", errors: error.errors });
-      } else {
-        console.error("Error creating pregnancy profile:", error);
-        res.status(500).json({ message: "Failed to create pregnancy profile" });
-      }
+      console.error("Error creating pregnancy profile:", error);
+      res.status(500).json({ message: "Failed to create pregnancy profile" });
     }
   }) as RequestHandler);
 
@@ -63,18 +59,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/symptoms', isAuthenticated, (async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const pregnancyId = req.query.pregnancyId as string;
-      
-      if (!pregnancyId) {
-        res.status(400).json({ message: "Pregnancy ID is required" });
-        return;
-      }
-      
-      const symptoms = await storage.getSymptomLogs(userId, pregnancyId);
-      res.json(symptoms);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const logs = await storage.getSymptomLogs(userId, limit);
+      res.json(logs);
     } catch (error) {
-      console.error("Error fetching symptoms:", error);
-      res.status(500).json({ message: "Failed to fetch symptoms" });
+      console.error("Error fetching symptom logs:", error);
+      res.status(500).json({ message: "Failed to fetch symptom logs" });
     }
   }) as RequestHandler);
 
@@ -83,166 +73,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const logData = insertSymptomLogSchema.parse({
         ...req.body,
-        userId,
+        userId
       });
-      
       const log = await storage.createSymptomLog(logData);
       res.json(log);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid symptom log data", errors: error.errors });
+      console.error("Error creating symptom log:", error);
+      res.status(500).json({ message: "Failed to create symptom log" });
+    }
+  }) as RequestHandler);
+
+  // Educational content routes
+  app.get('/api/education', (async (req: any, res) => {
+    try {
+      const week = req.query.week ? parseInt(req.query.week as string) : undefined;
+      const readabilityLevel = req.query.level as string;
+      
+      let content;
+      if (week) {
+        content = await storage.getEducationalContentByWeek(week, readabilityLevel);
       } else {
-        console.error("Error creating symptom log:", error);
-        res.status(500).json({ message: "Failed to create symptom log" });
-      }
-    }
-  }) as RequestHandler);
-
-  // Mood logging routes
-  app.get('/api/mood', isAuthenticated, (async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const pregnancyId = req.query.pregnancyId as string;
-      
-      if (!pregnancyId) {
-        res.status(400).json({ message: "Pregnancy ID is required" });
-        return;
+        content = await storage.getAllEducationalContent();
       }
       
-      const moods = await storage.getMoodLogs(userId, pregnancyId);
-      res.json(moods);
+      res.json(content);
     } catch (error) {
-      console.error("Error fetching mood logs:", error);
-      res.status(500).json({ message: "Failed to fetch mood logs" });
+      console.error("Error fetching educational content:", error);
+      res.status(500).json({ message: "Failed to fetch educational content" });
     }
   }) as RequestHandler);
 
-  app.get('/api/mood/today', isAuthenticated, (async (req: any, res) => {
+  // Forum routes
+  app.get('/api/forum/threads', (async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const pregnancyId = req.query.pregnancyId as string;
-      
-      if (!pregnancyId) {
-        res.status(400).json({ message: "Pregnancy ID is required" });
-        return;
-      }
-      
-      const todaysMood = await storage.getTodaysMoodLog(userId, pregnancyId);
-      res.json(todaysMood);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const threads = await storage.getForumThreads(limit);
+      res.json(threads);
     } catch (error) {
-      console.error("Error fetching today's mood:", error);
-      res.status(500).json({ message: "Failed to fetch today's mood" });
+      console.error("Error fetching forum threads:", error);
+      res.status(500).json({ message: "Failed to fetch forum threads" });
     }
   }) as RequestHandler);
 
-  app.post('/api/mood', isAuthenticated, (async (req: any, res) => {
+  app.get('/api/forum/threads/:id', (async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const logData = insertMoodLogSchema.parse({
+      const threadId = req.params.id;
+      const thread = await storage.getForumThread(threadId);
+      if (!thread) {
+        return res.status(404).json({ message: "Thread not found" });
+      }
+      const posts = await storage.getForumPosts(threadId);
+      res.json({ thread, posts });
+    } catch (error) {
+      console.error("Error fetching forum thread:", error);
+      res.status(500).json({ message: "Failed to fetch forum thread" });
+    }
+  }) as RequestHandler);
+
+  app.post('/api/forum/threads', isAuthenticated, (async (req: any, res) => {
+    try {
+      const authorId = req.user.claims.sub;
+      const threadData = insertForumThreadSchema.parse({
         ...req.body,
-        userId,
+        authorId
       });
-      
-      const log = await storage.createMoodLog(logData);
-      res.json(log);
+      const thread = await storage.createForumThread(threadData);
+      res.json(thread);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid mood log data", errors: error.errors });
-      } else {
-        console.error("Error creating mood log:", error);
-        res.status(500).json({ message: "Failed to create mood log" });
-      }
+      console.error("Error creating forum thread:", error);
+      res.status(500).json({ message: "Failed to create forum thread" });
     }
   }) as RequestHandler);
 
-  // Weight logging routes
-  app.get('/api/weight', isAuthenticated, (async (req: any, res) => {
+  app.post('/api/forum/threads/:id/posts', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const pregnancyId = req.query.pregnancyId as string;
-      
-      if (!pregnancyId) {
-        res.status(400).json({ message: "Pregnancy ID is required" });
-        return;
-      }
-      
-      const weights = await storage.getWeightLogs(userId, pregnancyId);
-      res.json(weights);
-    } catch (error) {
-      console.error("Error fetching weight logs:", error);
-      res.status(500).json({ message: "Failed to fetch weight logs" });
-    }
-  }) as RequestHandler);
-
-  app.post('/api/weight', isAuthenticated, (async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const logData = insertWeightLogSchema.parse({
+      const threadId = req.params.id;
+      const authorId = req.user.claims.sub;
+      const postData = insertForumPostSchema.parse({
         ...req.body,
-        userId,
+        threadId,
+        authorId
       });
-      
-      const log = await storage.createWeightLog(logData);
-      res.json(log);
+      const post = await storage.createForumPost(postData);
+      res.json(post);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid weight log data", errors: error.errors });
-      } else {
-        console.error("Error creating weight log:", error);
-        res.status(500).json({ message: "Failed to create weight log" });
-      }
+      console.error("Error creating forum post:", error);
+      res.status(500).json({ message: "Failed to create forum post" });
     }
   }) as RequestHandler);
 
-  // Milestone routes
-  app.get('/api/milestones', isAuthenticated, (async (req: any, res) => {
+  // Messaging routes
+  app.get('/api/messages', isAuthenticated, (async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const pregnancyId = req.query.pregnancyId as string;
-      
-      if (!pregnancyId) {
-        res.status(400).json({ message: "Pregnancy ID is required" });
-        return;
-      }
-      
-      const milestones = await storage.getMilestones(userId, pregnancyId);
-      res.json(milestones);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const messages = await storage.getMessages(userId, limit);
+      res.json(messages);
     } catch (error) {
-      console.error("Error fetching milestones:", error);
-      res.status(500).json({ message: "Failed to fetch milestones" });
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
     }
   }) as RequestHandler);
 
-  app.post('/api/milestones', isAuthenticated, (async (req: any, res) => {
+  app.get('/api/messages/conversation/:userId', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const milestoneData = insertMilestoneSchema.parse({
+      const currentUserId = req.user.claims.sub;
+      const otherUserId = req.params.userId;
+      const conversation = await storage.getConversation(currentUserId, otherUserId);
+      res.json(conversation);
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+      res.status(500).json({ message: "Failed to fetch conversation" });
+    }
+  }) as RequestHandler);
+
+  app.post('/api/messages', isAuthenticated, (async (req: any, res) => {
+    try {
+      const fromUser = req.user.claims.sub;
+      const messageData = insertMessageSchema.parse({
         ...req.body,
-        userId,
+        fromUser
       });
-      
-      const milestone = await storage.createMilestone(milestoneData);
-      res.json(milestone);
+      const message = await storage.createMessage(messageData);
+      res.json(message);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid milestone data", errors: error.errors });
-      } else {
-        console.error("Error creating milestone:", error);
-        res.status(500).json({ message: "Failed to create milestone" });
-      }
+      console.error("Error creating message:", error);
+      res.status(500).json({ message: "Failed to create message" });
     }
   }) as RequestHandler);
 
-  app.patch('/api/milestones/:id', isAuthenticated, (async (req: any, res) => {
+  app.patch('/api/messages/:id/read', isAuthenticated, (async (req: any, res) => {
     try {
-      const milestoneId = req.params.id;
-      const updates = req.body;
-      
-      const milestone = await storage.updateMilestone(milestoneId, updates);
-      res.json(milestone);
+      const messageId = req.params.id;
+      await storage.markMessageAsRead(messageId);
+      res.json({ success: true });
     } catch (error) {
-      console.error("Error updating milestone:", error);
-      res.status(500).json({ message: "Failed to update milestone" });
+      console.error("Error marking message as read:", error);
+      res.status(500).json({ message: "Failed to mark message as read" });
     }
   }) as RequestHandler);
 

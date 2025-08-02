@@ -35,6 +35,10 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  phone: text("phone").unique(),
+  displayName: varchar("display_name"),
+  isClinician: boolean("is_clinician").default(false),
+  profileCompleted: boolean("profile_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -47,6 +51,7 @@ export const pregnancyProfiles = pgTable("pregnancy_profiles", {
   currentWeek: integer("current_week").notNull().default(1),
   babyName: varchar("baby_name"),
   isActive: boolean("is_active").notNull().default(true),
+  highRiskFlags: jsonb("high_risk_flags"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -55,44 +60,60 @@ export const pregnancyProfiles = pgTable("pregnancy_profiles", {
 export const symptomLogs = pgTable("symptom_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  pregnancyId: varchar("pregnancy_id").notNull().references(() => pregnancyProfiles.id, { onDelete: "cascade" }),
-  symptoms: text("symptoms").array().notNull(), // Array of symptom names
-  severity: integer("severity").notNull(), // 1 = mild, 2 = moderate, 3 = severe
+  timestamp: timestamp("timestamp").defaultNow(),
+  symptoms: jsonb("symptoms").notNull(), // e.g., { "headache": 3, "swelling": 1 }
+  moodScore: integer("mood_score"), // 1-10 scale
   notes: text("notes"),
-  loggedAt: timestamp("logged_at").defaultNow(),
 });
 
-// Mood logs table
-export const moodLogs = pgTable("mood_logs", {
+// Educational content table
+export const educationalContents = pgTable("educational_contents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  pregnancyId: varchar("pregnancy_id").notNull().references(() => pregnancyProfiles.id, { onDelete: "cascade" }),
-  mood: varchar("mood").notNull(), // 'great', 'good', 'okay', 'tired', 'unwell'
-  notes: text("notes"),
-  loggedAt: timestamp("logged_at").defaultNow(),
-});
-
-// Weight logs table
-export const weightLogs = pgTable("weight_logs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  pregnancyId: varchar("pregnancy_id").notNull().references(() => pregnancyProfiles.id, { onDelete: "cascade" }),
-  weight: real("weight").notNull(),
-  unit: varchar("unit").notNull().default('lbs'), // 'lbs' or 'kg'
-  loggedAt: timestamp("logged_at").defaultNow(),
-});
-
-// Pregnancy milestones table
-export const pregnancyMilestones = pgTable("pregnancy_milestones", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  pregnancyId: varchar("pregnancy_id").notNull().references(() => pregnancyProfiles.id, { onDelete: "cascade" }),
-  title: varchar("title").notNull(),
-  description: text("description"),
   week: integer("week").notNull(),
-  isCompleted: boolean("is_completed").notNull().default(false),
-  completedAt: timestamp("completed_at"),
-  dueDate: date("due_date"),
+  title: varchar("title").notNull(),
+  bodyMarkdown: text("body_markdown").notNull(),
+  readabilityLevel: varchar("readability_level").notNull(), // "low", "medium", "high"
+  tags: text("tags").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Shared summaries table
+export const sharedSummaries = pgTable("shared_summaries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: varchar("token").notNull().unique(), // secure random string
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Forum threads table
+export const forumThreads = pgTable("forum_threads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  authorId: varchar("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  body: text("body").notNull(),
+  isFlagged: boolean("is_flagged").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Forum posts (replies) table
+export const forumPosts = pgTable("forum_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  threadId: varchar("thread_id").notNull().references(() => forumThreads.id, { onDelete: "cascade" }),
+  authorId: varchar("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  body: text("body").notNull(),
+  isFlagged: boolean("is_flagged").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Messages table
+export const messages = pgTable("messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fromUser: varchar("from_user").notNull().references(() => users.id, { onDelete: "cascade" }),
+  toUser: varchar("to_user").notNull().references(() => users.id, { onDelete: "cascade" }),
+  body: text("body").notNull(),
+  readAt: timestamp("read_at"),
+  isFlagged: boolean("is_flagged").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -100,20 +121,18 @@ export const pregnancyMilestones = pgTable("pregnancy_milestones", {
 export const usersRelations = relations(users, ({ many }) => ({
   pregnancyProfiles: many(pregnancyProfiles),
   symptomLogs: many(symptomLogs),
-  moodLogs: many(moodLogs),
-  weightLogs: many(weightLogs),
-  milestones: many(pregnancyMilestones),
+  sharedSummaries: many(sharedSummaries),
+  forumThreads: many(forumThreads),
+  forumPosts: many(forumPosts),
+  sentMessages: many(messages, { relationName: "sentMessages" }),
+  receivedMessages: many(messages, { relationName: "receivedMessages" }),
 }));
 
-export const pregnancyProfilesRelations = relations(pregnancyProfiles, ({ one, many }) => ({
+export const pregnancyProfilesRelations = relations(pregnancyProfiles, ({ one }) => ({
   user: one(users, {
     fields: [pregnancyProfiles.userId],
     references: [users.id],
   }),
-  symptomLogs: many(symptomLogs),
-  moodLogs: many(moodLogs),
-  weightLogs: many(weightLogs),
-  milestones: many(pregnancyMilestones),
 }));
 
 export const symptomLogsRelations = relations(symptomLogs, ({ one }) => ({
@@ -121,42 +140,44 @@ export const symptomLogsRelations = relations(symptomLogs, ({ one }) => ({
     fields: [symptomLogs.userId],
     references: [users.id],
   }),
-  pregnancy: one(pregnancyProfiles, {
-    fields: [symptomLogs.pregnancyId],
-    references: [pregnancyProfiles.id],
+}));
+
+export const sharedSummariesRelations = relations(sharedSummaries, ({ one }) => ({
+  user: one(users, {
+    fields: [sharedSummaries.userId],
+    references: [users.id],
   }),
 }));
 
-export const moodLogsRelations = relations(moodLogs, ({ one }) => ({
-  user: one(users, {
-    fields: [moodLogs.userId],
+export const forumThreadsRelations = relations(forumThreads, ({ one, many }) => ({
+  author: one(users, {
+    fields: [forumThreads.authorId],
     references: [users.id],
   }),
-  pregnancy: one(pregnancyProfiles, {
-    fields: [moodLogs.pregnancyId],
-    references: [pregnancyProfiles.id],
+  posts: many(forumPosts),
+}));
+
+export const forumPostsRelations = relations(forumPosts, ({ one }) => ({
+  thread: one(forumThreads, {
+    fields: [forumPosts.threadId],
+    references: [forumThreads.id],
+  }),
+  author: one(users, {
+    fields: [forumPosts.authorId],
+    references: [users.id],
   }),
 }));
 
-export const weightLogsRelations = relations(weightLogs, ({ one }) => ({
-  user: one(users, {
-    fields: [weightLogs.userId],
+export const messagesRelations = relations(messages, ({ one }) => ({
+  fromUser: one(users, {
+    fields: [messages.fromUser],
     references: [users.id],
+    relationName: "sentMessages",
   }),
-  pregnancy: one(pregnancyProfiles, {
-    fields: [weightLogs.pregnancyId],
-    references: [pregnancyProfiles.id],
-  }),
-}));
-
-export const pregnancyMilestonesRelations = relations(pregnancyMilestones, ({ one }) => ({
-  user: one(users, {
-    fields: [pregnancyMilestones.userId],
+  toUser: one(users, {
+    fields: [messages.toUser],
     references: [users.id],
-  }),
-  pregnancy: one(pregnancyProfiles, {
-    fields: [pregnancyMilestones.pregnancyId],
-    references: [pregnancyProfiles.id],
+    relationName: "receivedMessages",
   }),
 }));
 
@@ -169,34 +190,55 @@ export const insertPregnancyProfileSchema = createInsertSchema(pregnancyProfiles
 
 export const insertSymptomLogSchema = createInsertSchema(symptomLogs).omit({
   id: true,
-  loggedAt: true,
+  timestamp: true,
 });
 
-export const insertMoodLogSchema = createInsertSchema(moodLogs).omit({
-  id: true,
-  loggedAt: true,
-});
-
-export const insertWeightLogSchema = createInsertSchema(weightLogs).omit({
-  id: true,
-  loggedAt: true,
-});
-
-export const insertMilestoneSchema = createInsertSchema(pregnancyMilestones).omit({
+export const insertEducationalContentSchema = createInsertSchema(educationalContents).omit({
   id: true,
   createdAt: true,
 });
 
-// Types
+export const insertSharedSummarySchema = createInsertSchema(sharedSummaries).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertForumThreadSchema = createInsertSchema(forumThreads).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertForumPostSchema = createInsertSchema(forumPosts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMessageSchema = createInsertSchema(messages).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Type exports
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
 export type PregnancyProfile = typeof pregnancyProfiles.$inferSelect;
 export type InsertPregnancyProfile = z.infer<typeof insertPregnancyProfileSchema>;
+
 export type SymptomLog = typeof symptomLogs.$inferSelect;
 export type InsertSymptomLog = z.infer<typeof insertSymptomLogSchema>;
-export type MoodLog = typeof moodLogs.$inferSelect;
-export type InsertMoodLog = z.infer<typeof insertMoodLogSchema>;
-export type WeightLog = typeof weightLogs.$inferSelect;
-export type InsertWeightLog = z.infer<typeof insertWeightLogSchema>;
-export type PregnancyMilestone = typeof pregnancyMilestones.$inferSelect;
-export type InsertMilestone = z.infer<typeof insertMilestoneSchema>;
+
+export type EducationalContent = typeof educationalContents.$inferSelect;
+export type InsertEducationalContent = z.infer<typeof insertEducationalContentSchema>;
+
+export type SharedSummary = typeof sharedSummaries.$inferSelect;
+export type InsertSharedSummary = z.infer<typeof insertSharedSummarySchema>;
+
+export type ForumThread = typeof forumThreads.$inferSelect;
+export type InsertForumThread = z.infer<typeof insertForumThreadSchema>;
+
+export type ForumPost = typeof forumPosts.$inferSelect;
+export type InsertForumPost = z.infer<typeof insertForumPostSchema>;
+
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
