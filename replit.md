@@ -8,6 +8,25 @@ MaternalCare is a comprehensive clinical pregnancy tracking platform that enable
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (August 2025)
+
+✓ **Advanced Symptom Tracking System Implemented:**
+  - JSONB-based symptom logging with 1-5 severity scale and mood integration (1-10)
+  - Clinical analytics with symptom frequency analysis and trend tracking
+  - Comprehensive symptom management interface with common symptom quick-add
+  - Sample data demonstrating clinical JSONB structure
+
+✓ **Secure Data Sharing Platform Added:**
+  - Token-based secure sharing system for healthcare provider access
+  - Configurable expiration periods (1 day to 1 month) with automatic cleanup
+  - Public summary viewer with clinical analytics and symptom history
+  - Privacy-focused design with revokable access tokens
+
+✓ **Hybrid Authentication System Active:**
+  - Graceful fallback between Supabase OTP/SMS and Replit authentication
+  - Error handling for missing environment variables
+  - Smart routing based on available authentication methods
+
 ## System Architecture
 
 ### Frontend Architecture

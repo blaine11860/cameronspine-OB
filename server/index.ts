@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import authRoutes from "./auth.js";
 import profileRoutes from "./profile.js";
 import symptomsRoutes from "./symptoms.js";
+import shareRoutes from "./share.js";
 
 const app = express();
 app.use(express.json());
@@ -13,6 +14,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/symptoms", symptomsRoutes);
+app.use("/api/share", shareRoutes);
 
 app.use((req, res, next) => {
   const start = Date.now();

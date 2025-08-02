@@ -11,6 +11,8 @@ import Timeline from "./pages/timeline";
 import Profile from "./pages/profile";
 import AuthPage from "./pages/auth";
 import SymptomsPage from "./pages/symptoms";
+import SharePage from "./pages/share";
+import SharedSummaryPage from "./pages/shared-summary";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -36,8 +38,11 @@ function Router() {
           <Route path="/timeline" component={Timeline} />
           <Route path="/profile" component={Profile} />
           <Route path="/symptoms" component={SymptomsPage} />
+          <Route path="/share" component={SharePage} />
         </>
       )}
+      {/* Public routes (no auth required) */}
+      <Route path="/shared/:token" component={SharedSummaryPage} />
       <Route component={NotFound} />
     </Switch>
   );
