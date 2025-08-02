@@ -2,6 +2,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 import PregnancyProgress from "@/components/PregnancyProgress";
 import PregnancyTimeline from "@/components/PregnancyTimeline";
@@ -16,6 +18,7 @@ import type { PregnancyProfile } from "@shared/schema";
 
 export default function Home() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [showSymptomLogger, setShowSymptomLogger] = useState(false);
 
   // Mock user data for demo purposes
@@ -98,13 +101,15 @@ export default function Home() {
             </div>
             
             <div className="flex items-center space-x-4">
+              <LanguageSelector />
+              
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => window.open('https://mooreobgyn.com/', '_blank')}
                 className="border-rose-deep text-rose-deep hover:bg-rose-deep hover:text-white"
               >
-                Schedule Appointment
+                {t.scheduleAppointment}
               </Button>
               
               <button className="relative p-2 text-gray-600 hover:text-rose-deep transition-colors">
@@ -134,9 +139,9 @@ export default function Home() {
         <div className="mb-8">
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
-              Welcome back, {user?.firstName || 'there'}!
+              {t.welcomeBack}, {user?.firstName || 'there'}!
             </h2>
-            <p className="text-gray-600">Let's check in on your pregnancy journey</p>
+            <p className="text-gray-600">{t.pregnancyJourney}</p>
           </div>
 
           <PregnancyProgress pregnancyProfile={pregnancyProfile} />
@@ -147,14 +152,14 @@ export default function Home() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Need to Schedule an Appointment?</h3>
-                <p className="text-gray-600 text-sm">Book your next prenatal visit with Moore OB/GYN</p>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">{t.schedulingSection}</h3>
+                <p className="text-gray-600 text-sm">{t.schedulingDescription}</p>
               </div>
               <Button 
                 onClick={() => window.open('https://mooreobgyn.com/', '_blank')}
                 className="bg-rose-deep hover:bg-rose-deep/90 text-white"
               >
-                Schedule Now
+{t.bookAppointment}
               </Button>
             </div>
           </CardContent>
@@ -172,7 +177,7 @@ export default function Home() {
             {/* Today's Check */}
             <Card className="border-rose-100">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Today's Check-in</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">{t.quickActions}</h3>
                 
                 <MoodCheck pregnancyProfile={pregnancyProfile} />
                 
@@ -182,7 +187,7 @@ export default function Home() {
                     className="w-full bg-gradient-to-r from-rose-soft to-rose-deep text-white hover:shadow-lg transition-all duration-200"
                   >
                     <Plus className="mr-2 h-4 w-4" />
-                    Log Symptoms
+{t.logSymptomsAction}
                   </Button>
                   <Button 
                     variant="outline"
@@ -198,7 +203,7 @@ export default function Home() {
             {/* Recent Activity */}
             <Card className="border-rose-100">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">{t.recentActivity}</h3>
                 
                 <div className="space-y-3">
                   {recentSymptoms && recentSymptoms.length > 0 ? (

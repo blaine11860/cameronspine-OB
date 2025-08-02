@@ -1,15 +1,17 @@
 import { useLocation } from "wouter";
 import { Home, Clock, MessageCircle, Activity, User, Users } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
+  const { t } = useTranslation();
 
   const navigationItems = [
-    { path: "/", icon: Home, label: "Home" },
-    { path: "/symptoms", icon: Activity, label: "Symptoms" },
-    { path: "/forum", icon: Users, label: "Forum" },
-    { path: "/messages", icon: MessageCircle, label: "Messages" },
-    { path: "/profile", icon: User, label: "Profile" },
+    { path: "/", icon: Home, labelKey: "home" as const },
+    { path: "/symptoms", icon: Activity, labelKey: "symptomsNav" as const },
+    { path: "/forum", icon: Users, labelKey: "forum" as const },
+    { path: "/messages", icon: MessageCircle, labelKey: "messages" as const },
+    { path: "/profile", icon: User, labelKey: "profile" as const },
   ];
 
   return (
@@ -29,7 +31,7 @@ export default function BottomNavigation() {
             >
               <Icon className="h-5 w-5" />
               <span className={`text-xs ${isActive ? "font-medium" : ""}`}>
-                {item.label}
+                {t[item.labelKey]}
               </span>
             </button>
           );
