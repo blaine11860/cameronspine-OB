@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -43,7 +43,9 @@ type ForumThread = {
 };
 
 export default function Forum() {
-  const { user, isAuthenticated } = useAuth();
+  // Mock user for demo purposes
+  const user = { firstName: "Sarah", lastName: "Johnson" };
+  const isAuthenticated = true;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");

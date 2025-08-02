@@ -1,8 +1,8 @@
-import { useAuth } from "@/hooks/useAuth";
+
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
+
 import BottomNavigation from "@/components/BottomNavigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,57 +12,13 @@ import { TimelineEducation } from "@/components/TimelineEducation";
 import type { PregnancyProfile } from "@shared/schema";
 
 export default function Timeline() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  // Mock user data for demo purposes
+  const user = { firstName: "Sarah", lastName: "Johnson" };
   const { toast } = useToast();
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  const { data: pregnancyProfile, error: profileError } = useQuery<PregnancyProfile>({
+  const { data: pregnancyProfile } = useQuery<PregnancyProfile>({
     queryKey: ["/api/pregnancy/profile"],
-    enabled: isAuthenticated,
   });
-
-  // Remove unused milestones query for now
-
-  // Handle errors
-  useEffect(() => {
-    if (profileError && isUnauthorizedError(profileError as Error)) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-    }
-  }, [profileError, toast]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-rose-soft to-rose-deep rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="text-white text-2xl animate-pulse" />
-          </div>
-          <p className="text-gray-600">Loading timeline...</p>
-        </div>
-      </div>
-    );
-  }
 
   const defaultMilestones = [
     { week: 8, title: "First Prenatal Visit", description: "Initial checkup and blood tests", status: "completed" },

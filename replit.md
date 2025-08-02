@@ -8,7 +8,14 @@ Moore Maternal Care is a comprehensive clinical pregnancy tracking platform that
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (August 2025)
+## Recent Changes (February 2025)
+
+✓ **Authentication System Completely Removed:**
+  - Eliminated all authentication requirements from frontend and backend
+  - Converted to demo mode with mock user data for ease of use
+  - Removed Replit Auth, Supabase Auth, and all session management
+  - All pages now accessible without login requirements
+  - Mock user profiles and pregnancy data for demonstration purposes
 
 ✓ **Advanced Symptom Tracking System Implemented:**
   - JSONB-based symptom logging with 1-5 severity scale and mood integration (1-10)
@@ -22,17 +29,18 @@ Preferred communication style: Simple, everyday language.
   - Public summary viewer with clinical analytics and symptom history
   - Privacy-focused design with revokable access tokens
 
-✓ **Hybrid Authentication System Active:**
-  - Graceful fallback between Supabase OTP/SMS and Replit authentication
-  - Error handling for missing environment variables
-  - Smart routing based on available authentication methods
-
 ✓ **Real-Time Communication Infrastructure Added:**
-  - Socket.IO integration with hybrid authentication support
+  - Socket.IO integration with mock user support
   - Direct messaging between patients and healthcare providers
   - Emergency consultation requests with automated clinician alerts
   - Real-time typing indicators and message read receipts
   - Emergency message flagging for urgent medical communications
+
+✓ **External Appointment Scheduling Integration:**
+  - "Schedule Appointment" buttons added throughout platform
+  - Direct links to https://mooreobgyn.com/ for seamless booking
+  - Prominent placement in navigation bars across all pages
+  - Dedicated appointment section on home dashboard
 
 ## System Architecture
 
@@ -68,11 +76,11 @@ Preferred communication style: Simple, everyday language.
 - **Type Generation**: Drizzle generates TypeScript types from database schema
 - **Form Validation**: Client-side validation using React Hook Form with Zod resolvers
 
-### Authentication Flow (Updated: August 2025)
-- **Supabase Authentication**: OTP/SMS-based authentication with phone number verification
-- **Session Management**: Supabase session handling with automatic token refresh
-- **Route Protection**: Authentication middleware protecting sensitive API endpoints
-- **User Context**: React Query for managing authentication state and user sessions
+### Demo Mode (Updated: February 2025)
+- **No Authentication Required**: Complete removal of all authentication systems
+- **Mock User Data**: Demo user profiles and pregnancy data for immediate access
+- **Open Access**: All features accessible without login or registration
+- **Sample Data**: Realistic mock data for symptoms, mood tracking, and messaging
 
 ## External Dependencies
 

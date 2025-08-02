@@ -1,8 +1,8 @@
-import { useAuth } from "@/hooks/useAuth";
+
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
+
 import PregnancyProgress from "@/components/PregnancyProgress";
 import PregnancyTimeline from "@/components/PregnancyTimeline";
 import MoodCheck from "@/components/MoodCheck";
@@ -15,28 +15,32 @@ import { useState } from "react";
 import type { PregnancyProfile } from "@shared/schema";
 
 export default function Home() {
-  const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [showSymptomLogger, setShowSymptomLogger] = useState(false);
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
+  // Mock user data for demo purposes
+  const user = {
+    firstName: "Sarah",
+    lastName: "Johnson", 
+    profileImageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+    email: "sarah.johnson@email.com"
+  };
 
-  const { data: pregnancyProfile, error: profileError } = useQuery<PregnancyProfile>({
+  // Mock pregnancy profile data for demo purposes
+  const pregnancyProfile: PregnancyProfile = {
+    id: "mock-profile-1",
+    userId: "mock-user-1",
+    dueDate: "2025-05-15",
+    currentWeek: 24,
+    babyName: "Baby Johnson",
+    isHighRisk: false,
+    notes: "Everything progressing well",
+    createdAt: "2024-11-01T00:00:00Z",
+    updatedAt: "2025-02-02T00:00:00Z"
+  };
+
+  const { data: pregnancyProfileData } = useQuery<PregnancyProfile>({
     queryKey: ["/api/pregnancy/profile"],
-    enabled: isAuthenticated,
   });
 
   const { data: recentSymptoms } = useQuery({
@@ -55,32 +59,7 @@ export default function Home() {
     }
   });
 
-  // Handle errors
-  useEffect(() => {
-    if (profileError && isUnauthorizedError(profileError as Error)) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-    }
-  }, [profileError, toast]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-rose-soft to-rose-deep rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="text-white text-2xl animate-pulse" />
-          </div>
-          <p className="text-gray-600">Loading your pregnancy journey...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!pregnancyProfile) {
     return (
@@ -144,12 +123,6 @@ export default function Home() {
                 <span className="text-sm font-medium text-gray-700">
                   {user?.firstName || 'User'}
                 </span>
-                <button 
-                  onClick={() => window.location.href = '/api/logout'}
-                  className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Logout
-                </button>
               </div>
             </div>
           </div>
