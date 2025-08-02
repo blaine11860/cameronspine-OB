@@ -24,6 +24,13 @@ export interface Translations {
   next: string;
   previous: string;
   search: string;
+  mobileAccess: string;
+  accessOnMobile: string;
+  scanQRCode: string;
+  howToUse: string;
+  copyUrl: string;
+  mobileOptimized: string;
+  fullFeatures: string;
 
   // Home page
   welcomeBack: string;
@@ -144,6 +151,13 @@ const translations: Record<Language, Translations> = {
     next: 'Next',
     previous: 'Previous',
     search: 'Search',
+    mobileAccess: 'Mobile Access',
+    accessOnMobile: 'Access on Mobile',
+    scanQRCode: 'Scan the QR code with your phone\'s camera to access Moore Maternal Care on your mobile device.',
+    howToUse: 'How to use:',
+    copyUrl: 'Or copy the URL to share manually',
+    mobileOptimized: 'Mobile Optimized',
+    fullFeatures: 'Full pregnancy tracking features, optimized for mobile use with touch-friendly controls and offline capability.',
 
     // Home page
     welcomeBack: 'Welcome back',
@@ -261,6 +275,13 @@ const translations: Record<Language, Translations> = {
     next: 'Siguiente',
     previous: 'Anterior',
     search: 'Buscar',
+    mobileAccess: 'Acceso Móvil',
+    accessOnMobile: 'Acceder en Móvil',
+    scanQRCode: 'Escanea el código QR con la cámara de tu teléfono para acceder a Moore Maternal Care en tu dispositivo móvil.',
+    howToUse: 'Cómo usar:',
+    copyUrl: 'O copia la URL para compartir manualmente',
+    mobileOptimized: 'Optimizado para Móvil',
+    fullFeatures: 'Características completas de seguimiento del embarazo, optimizadas para uso móvil con controles táctiles y capacidad sin conexión.',
 
     // Home page
     welcomeBack: 'Bienvenida de nuevo',
@@ -378,6 +399,13 @@ const translations: Record<Language, Translations> = {
     next: 'Suivant',
     previous: 'Précédent',
     search: 'Rechercher',
+    mobileAccess: 'Accès Mobile',
+    accessOnMobile: 'Accéder sur Mobile',
+    scanQRCode: 'Scannez le code QR avec l\'appareil photo de votre téléphone pour accéder à Moore Maternal Care sur votre appareil mobile.',
+    howToUse: 'Comment utiliser:',
+    copyUrl: 'Ou copiez l\'URL pour partager manuellement',
+    mobileOptimized: 'Optimisé pour Mobile',
+    fullFeatures: 'Fonctionnalités complètes de suivi de grossesse, optimisées pour une utilisation mobile avec des contrôles tactiles et une capacité hors ligne.',
 
     // Home page
     welcomeBack: 'Bon retour',

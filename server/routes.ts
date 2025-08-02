@@ -318,6 +318,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }) as RequestHandler);
 
+  // QR Code generation route
+  app.get('/api/qrcode', (async (req: any, res) => {
+    try {
+      const { generateQRCode } = require('./qrcode.js');
+      const url = req.query.url || `${req.protocol}://${req.get('host')}`;
+      
+      const qrCodeSVG = await generateQRCode(url, {
+        type: 'svg',
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#BE185D', // Rose-deep color
+          light: '#FFFFFF'
+        }
+      });
+      
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.send(qrCodeSVG);
+    } catch (error) {
+      console.error("Error generating QR code:", error);
+      res.status(500).json({ message: "Failed to generate QR code" });
+    }
+  }) as RequestHandler);
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -12,6 +12,7 @@ import SymptomLogger from "@/components/SymptomLogger";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { QRCodeDownload } from "@/components/QRCodeDownload";
 import { Bell, Plus, Weight, Check, Heart } from "lucide-react";
 import { useState } from "react";
 import type { PregnancyProfile } from "@shared/schema";
@@ -102,6 +103,8 @@ export default function Home() {
             
             <div className="flex items-center space-x-4">
               <LanguageSelector />
+              
+              <QRCodeDownload />
               
               <Button 
                 variant="outline" 
