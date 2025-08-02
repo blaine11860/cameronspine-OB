@@ -1,4 +1,4 @@
-import type { Express, Request } from "express";
+import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
@@ -11,49 +11,37 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
-interface AuthenticatedRequest extends Request {
-  user?: {
-    claims: {
-      sub: string;
-      email?: string;
-      first_name?: string;
-      last_name?: string;
-      profile_image_url?: string;
-    };
-  };
-}
-
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/auth/user', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
-  });
+  }) as RequestHandler);
 
   // Pregnancy profile routes
-  app.get('/api/pregnancy/profile', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/pregnancy/profile', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const profile = await storage.getActivePregnancyProfile(userId);
       res.json(profile);
     } catch (error) {
       console.error("Error fetching pregnancy profile:", error);
       res.status(500).json({ message: "Failed to fetch pregnancy profile" });
     }
-  });
+  }) as RequestHandler);
 
-  app.post('/api/pregnancy/profile', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/pregnancy/profile', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const profileData = insertPregnancyProfileSchema.parse({
         ...req.body,
         userId,
@@ -69,12 +57,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(500).json({ message: "Failed to create pregnancy profile" });
       }
     }
-  });
+  }) as RequestHandler);
 
   // Symptom logging routes
-  app.get('/api/symptoms', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/symptoms', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const pregnancyId = req.query.pregnancyId as string;
       
       if (!pregnancyId) {
@@ -88,11 +76,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching symptoms:", error);
       res.status(500).json({ message: "Failed to fetch symptoms" });
     }
-  });
+  }) as RequestHandler);
 
-  app.post('/api/symptoms', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/symptoms', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const logData = insertSymptomLogSchema.parse({
         ...req.body,
         userId,
@@ -108,12 +96,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(500).json({ message: "Failed to create symptom log" });
       }
     }
-  });
+  }) as RequestHandler);
 
   // Mood logging routes
-  app.get('/api/mood', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/mood', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const pregnancyId = req.query.pregnancyId as string;
       
       if (!pregnancyId) {
@@ -127,11 +115,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching mood logs:", error);
       res.status(500).json({ message: "Failed to fetch mood logs" });
     }
-  });
+  }) as RequestHandler);
 
-  app.get('/api/mood/today', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/mood/today', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const pregnancyId = req.query.pregnancyId as string;
       
       if (!pregnancyId) {
@@ -145,11 +133,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching today's mood:", error);
       res.status(500).json({ message: "Failed to fetch today's mood" });
     }
-  });
+  }) as RequestHandler);
 
-  app.post('/api/mood', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/mood', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const logData = insertMoodLogSchema.parse({
         ...req.body,
         userId,
@@ -165,12 +153,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(500).json({ message: "Failed to create mood log" });
       }
     }
-  });
+  }) as RequestHandler);
 
   // Weight logging routes
-  app.get('/api/weight', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/weight', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const pregnancyId = req.query.pregnancyId as string;
       
       if (!pregnancyId) {
@@ -184,11 +172,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching weight logs:", error);
       res.status(500).json({ message: "Failed to fetch weight logs" });
     }
-  });
+  }) as RequestHandler);
 
-  app.post('/api/weight', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/weight', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const logData = insertWeightLogSchema.parse({
         ...req.body,
         userId,
@@ -204,12 +192,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(500).json({ message: "Failed to create weight log" });
       }
     }
-  });
+  }) as RequestHandler);
 
   // Milestone routes
-  app.get('/api/milestones', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/milestones', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const pregnancyId = req.query.pregnancyId as string;
       
       if (!pregnancyId) {
@@ -223,11 +211,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching milestones:", error);
       res.status(500).json({ message: "Failed to fetch milestones" });
     }
-  });
+  }) as RequestHandler);
 
-  app.post('/api/milestones', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/milestones', isAuthenticated, (async (req: any, res) => {
     try {
-      const userId = req.user!.claims.sub;
+      const userId = req.user.claims.sub;
       const milestoneData = insertMilestoneSchema.parse({
         ...req.body,
         userId,
@@ -243,9 +231,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(500).json({ message: "Failed to create milestone" });
       }
     }
-  });
+  }) as RequestHandler);
 
-  app.patch('/api/milestones/:id', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.patch('/api/milestones/:id', isAuthenticated, (async (req: any, res) => {
     try {
       const milestoneId = req.params.id;
       const updates = req.body;
@@ -256,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error updating milestone:", error);
       res.status(500).json({ message: "Failed to update milestone" });
     }
-  });
+  }) as RequestHandler);
 
   const httpServer = createServer(app);
   return httpServer;

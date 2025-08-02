@@ -5,10 +5,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
-import Home from "@/pages/home";
-import Timeline from "@/pages/timeline";
-import Profile from "@/pages/profile";
+import Landing from "./pages/landing";
+import Home from "./pages/home";
+import Timeline from "./pages/timeline";
+import Profile from "./pages/profile";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
