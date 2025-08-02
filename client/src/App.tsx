@@ -13,6 +13,7 @@ import AuthPage from "./pages/auth";
 import SymptomsPage from "./pages/symptoms";
 import SharePage from "./pages/share";
 import SharedSummaryPage from "./pages/shared-summary";
+import MessagesPage from "./pages/messages";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -39,6 +40,7 @@ function Router() {
           <Route path="/profile" component={Profile} />
           <Route path="/symptoms" component={SymptomsPage} />
           <Route path="/share" component={SharePage} />
+          <Route path="/messages" component={MessagesPage} />
         </>
       )}
       {/* Public routes (no auth required) */}

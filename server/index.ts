@@ -1,10 +1,12 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { attachRealtime } from "./realtime.js";
 import authRoutes from "./auth.js";
 import profileRoutes from "./profile.js";
 import symptomsRoutes from "./symptoms.js";
 import shareRoutes from "./share.js";
+import messagesRoutes from "./messages.js";
 
 const app = express();
 app.use(express.json());
@@ -15,6 +17,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/symptoms", symptomsRoutes);
 app.use("/api/share", shareRoutes);
+app.use("/api/messages", messagesRoutes);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -48,6 +51,9 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+
+  // Attach real-time WebSocket functionality
+  attachRealtime(server);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
