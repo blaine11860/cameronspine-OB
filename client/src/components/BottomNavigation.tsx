@@ -1,14 +1,14 @@
 import { useLocation } from "wouter";
-import { Home, Clock, Plus, TrendingUp, User } from "lucide-react";
+import { Home, Clock, MessageCircle, Activity, User } from "lucide-react";
 
 export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
 
   const navigationItems = [
     { path: "/", icon: Home, label: "Home" },
+    { path: "/symptoms", icon: Activity, label: "Symptoms" },
+    { path: "/messages", icon: MessageCircle, label: "Messages" },
     { path: "/timeline", icon: Clock, label: "Timeline" },
-    { path: "/log", icon: Plus, label: "Log" },
-    { path: "/insights", icon: TrendingUp, label: "Insights" },
     { path: "/profile", icon: User, label: "Profile" },
   ];
 

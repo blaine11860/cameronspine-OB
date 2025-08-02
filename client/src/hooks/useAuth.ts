@@ -14,6 +14,9 @@ export function useAuth() {
     queryFn: async () => {
       if (supabase) {
         const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          localStorage.setItem('supabase_token', session.access_token);
+        }
         return session?.user || null;
       } else {
         // Fallback to original Replit auth endpoint
@@ -25,11 +28,50 @@ export function useAuth() {
     retry: false,
   });
 
+  // OTP authentication helpers
+  const sendOTP = async (phone: string) => {
+    if (!supabase) throw new Error('Supabase not configured');
+    const { error } = await supabase.auth.signInWithOtp({ phone });
+    return error;
+  };
+
+  const verifyOTP = async (phone: string, token: string) => {
+    if (!supabase) throw new Error('Supabase not configured');
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone,
+      token,
+      type: 'sms'
+    });
+    return { data, error };
+  };
+
+  const signOut = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+      localStorage.removeItem('supabase_token');
+    } else {
+      // Replit Auth logout
+      window.location.href = '/api/logout';
+    }
+  };
+
+  const getSession = () => {
+    if (supabase) {
+      return supabase.auth.getSession();
+    }
+    return null;
+  };
+
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
     supabase,
     hasSupabase: !!supabase,
+    sendOTP,
+    verifyOTP,
+    signOut,
+    getSession,
+    authMethod: supabase && user ? 'supabase' : user ? 'replit' : null,
   };
 }
