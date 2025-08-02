@@ -3,8 +3,18 @@ import { supabase } from './supabaseClient.js';
 
 const router = express.Router();
 
+// Middleware to check if Supabase is configured
+const requireSupabase = (req, res, next) => {
+  if (!supabase) {
+    return res.status(503).json({ 
+      error: 'Supabase authentication not configured. Please provide SUPABASE_URL and SUPABASE_ANON_KEY.' 
+    });
+  }
+  next();
+};
+
 // Request OTP (magic link / SMS)
-router.post('/send-otp', async (req, res) => {
+router.post('/send-otp', requireSupabase, async (req, res) => {
   const { phone } = req.body;
   const { data, error } = await supabase.auth.signInWithOtp({
     phone,
@@ -14,7 +24,7 @@ router.post('/send-otp', async (req, res) => {
 });
 
 // Verify OTP
-router.post('/verify-otp', async (req, res) => {
+router.post('/verify-otp', requireSupabase, async (req, res) => {
   const { phone, token } = req.body;
   const { data, error } = await supabase.auth.verifyOtp({
     phone,
@@ -26,7 +36,7 @@ router.post('/verify-otp', async (req, res) => {
 });
 
 // Get current user
-router.get('/user', async (req, res) => {
+router.get('/user', requireSupabase, async (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) {
     return res.status(401).json({ error: 'No token provided' });
@@ -38,7 +48,7 @@ router.get('/user', async (req, res) => {
 });
 
 // Sign out
-router.post('/signout', async (req, res) => {
+router.post('/signout', requireSupabase, async (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (token) {
     await supabase.auth.admin.signOut(token);

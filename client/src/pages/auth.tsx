@@ -10,11 +10,18 @@ export default function AuthPage() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
-  const { supabase } = useAuth();
+  const { supabase, hasSupabase } = useAuth();
   const { toast } = useToast();
+
+  // If Supabase is not configured, redirect to Replit auth
+  if (!hasSupabase) {
+    window.location.href = '/api/login';
+    return null;
+  }
 
   const sendOtpMutation = useMutation({
     mutationFn: async (phoneNumber: string) => {
+      if (!supabase) throw new Error('Authentication not configured');
       const { error } = await supabase.auth.signInWithOtp({
         phone: phoneNumber,
       });
@@ -38,6 +45,7 @@ export default function AuthPage() {
 
   const verifyOtpMutation = useMutation({
     mutationFn: async ({ phone, token }: { phone: string; token: string }) => {
+      if (!supabase) throw new Error('Authentication not configured');
       const { error } = await supabase.auth.verifyOtp({
         phone,
         token,

@@ -2,26 +2,34 @@ import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@supabase/supabase-js";
 import type { User } from "@shared/schema";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL || '',
-  import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-);
+// Only create Supabase client if environment variables are available
+const supabase = (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) 
+  ? createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY)
+  : null;
 
 export function useAuth() {
-  const { data: session, isLoading } = useQuery({
-    queryKey: ["auth-session"],
+  // If Supabase is not configured, check for Replit auth session
+  const { data: user, isLoading } = useQuery<User>({
+    queryKey: supabase ? ["supabase-auth-session"] : ["/api/auth/user"],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      return session;
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        return session?.user || null;
+      } else {
+        // Fallback to original Replit auth endpoint
+        const response = await fetch("/api/auth/user");
+        if (!response.ok) return null;
+        return response.json();
+      }
     },
     retry: false,
   });
 
   return {
-    user: session?.user || null,
-    session,
+    user,
     isLoading,
-    isAuthenticated: !!session?.user,
+    isAuthenticated: !!user,
     supabase,
+    hasSupabase: !!supabase,
   };
 }

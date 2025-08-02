@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import authRoutes from "./auth.js";
+import profileRoutes from "./profile.js";
 
 const app = express();
 app.use(express.json());
@@ -9,6 +10,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Add Supabase auth routes
 app.use("/api/auth", authRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.use((req, res, next) => {
   const start = Date.now();
