@@ -7,6 +7,7 @@ import profileRoutes from "./profile.js";
 import symptomsRoutes from "./symptoms.js";
 import shareRoutes from "./share.js";
 import messagesRoutes from "./messages.js";
+import educationRoutes from "./education.js";
 
 const app = express();
 app.use(express.json());
@@ -18,6 +19,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/symptoms", symptomsRoutes);
 app.use("/api/share", shareRoutes);
 app.use("/api/messages", messagesRoutes);
+app.use("/api/education", educationRoutes);
 
 app.use((req, res, next) => {
   const start = Date.now();

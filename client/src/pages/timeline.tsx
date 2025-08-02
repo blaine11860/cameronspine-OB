@@ -6,8 +6,9 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowLeft, Check, Clock, Calendar } from "lucide-react";
+import { Heart, ArrowLeft, Check, Clock, Calendar, BookOpen } from "lucide-react";
 import { Link } from "wouter";
+import { TimelineEducation } from "@/components/TimelineEducation";
 import type { PregnancyProfile, PregnancyMilestone } from "@shared/schema";
 
 export default function Timeline() {
@@ -181,6 +182,20 @@ export default function Timeline() {
                 );
               })}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Educational Content */}
+        <Card className="border-rose-100 mt-8">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Educational Content</h3>
+                <p className="text-sm text-gray-600">Learn about your pregnancy week by week</p>
+              </div>
+              <BookOpen className="h-6 w-6 text-rose-deep" />
+            </div>
+            <TimelineEducation gestationalWeeks={currentWeek} />
           </CardContent>
         </Card>
 
