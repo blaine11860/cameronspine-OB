@@ -10,6 +10,7 @@ import Home from "./pages/home";
 import Timeline from "./pages/timeline";
 import Profile from "./pages/profile";
 import AuthPage from "./pages/auth";
+import SymptomsPage from "./pages/symptoms";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -34,6 +35,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/timeline" component={Timeline} />
           <Route path="/profile" component={Profile} />
+          <Route path="/symptoms" component={SymptomsPage} />
         </>
       )}
       <Route component={NotFound} />

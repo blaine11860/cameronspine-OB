@@ -3,14 +3,16 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import authRoutes from "./auth.js";
 import profileRoutes from "./profile.js";
+import symptomsRoutes from "./symptoms.js";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Add Supabase auth routes
+// Add API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/symptoms", symptomsRoutes);
 
 app.use((req, res, next) => {
   const start = Date.now();
