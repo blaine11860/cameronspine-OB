@@ -1,8 +1,8 @@
-# MaternalCare - Pregnancy Tracking Application
+# Moore Maternal Care - Pregnancy Tracking Application
 
 ## Overview
 
-MaternalCare is a comprehensive clinical pregnancy tracking platform that enables expectant mothers, clinicians, and healthcare providers to monitor pregnancy journeys through advanced features including educational content delivery, community forums, secure messaging, and clinical-grade data tracking. The platform supports both patient self-monitoring and professional clinical oversight with features designed for high-risk pregnancy management.
+Moore Maternal Care is a comprehensive clinical pregnancy tracking platform that enables expectant mothers, clinicians, and healthcare providers to monitor pregnancy journeys through advanced features including educational content delivery, community forums, secure messaging, and clinical-grade data tracking. The platform supports both patient self-monitoring and professional clinical oversight with features designed for high-risk pregnancy management.
 
 ## User Preferences
 

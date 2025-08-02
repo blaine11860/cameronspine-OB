@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, ArrowLeft, Check, Clock, Calendar, BookOpen } from "lucide-react";
 import { Link } from "wouter";
 import { TimelineEducation } from "@/components/TimelineEducation";
-import type { PregnancyProfile, PregnancyMilestone } from "@shared/schema";
+import type { PregnancyProfile } from "@shared/schema";
 
 export default function Timeline() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -35,18 +35,11 @@ export default function Timeline() {
     enabled: isAuthenticated,
   });
 
-  const { data: milestones, error: milestonesError } = useQuery<PregnancyMilestone[]>({
-    queryKey: ["/api/milestones"],
-    enabled: !!pregnancyProfile?.id,
-    meta: {
-      params: { pregnancyId: pregnancyProfile?.id }
-    }
-  });
+  // Remove unused milestones query for now
 
   // Handle errors
   useEffect(() => {
-    if ((profileError && isUnauthorizedError(profileError as Error)) ||
-        (milestonesError && isUnauthorizedError(milestonesError as Error))) {
+    if (profileError && isUnauthorizedError(profileError as Error)) {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
@@ -56,7 +49,7 @@ export default function Timeline() {
         window.location.href = "/api/login";
       }, 500);
     }
-  }, [profileError, milestonesError, toast]);
+  }, [profileError, toast]);
 
   if (isLoading) {
     return (
