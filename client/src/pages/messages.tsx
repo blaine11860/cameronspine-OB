@@ -170,11 +170,20 @@ export default function MessagesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Messages</h1>
-        <p className="text-gray-600">
-          Secure messaging with your healthcare team and community members
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Messages</h1>
+          <p className="text-gray-600">
+            Secure messaging with your healthcare team and community members
+          </p>
+        </div>
+        <Button 
+          variant="outline"
+          onClick={() => window.open('https://mooreobgyn.com/', '_blank')}
+          className="border-rose-deep text-rose-deep hover:bg-rose-deep hover:text-white"
+        >
+          Schedule Appointment
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">

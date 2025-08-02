@@ -87,7 +87,7 @@ export default function Home() {
       <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">Welcome to MaternalCare!</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-4">Welcome to Moore Maternal Care!</h1>
             <p className="text-gray-600 mb-8">Let's set up your pregnancy profile to get started.</p>
             <Card className="max-w-md mx-auto">
               <CardContent className="pt-6">
@@ -115,10 +115,19 @@ export default function Home() {
               <div className="w-10 h-10 bg-gradient-to-br from-rose-soft to-rose-deep rounded-full flex items-center justify-center">
                 <Heart className="text-white text-lg" />
               </div>
-              <h1 className="text-xl font-semibold text-gray-800">MaternalCare</h1>
+              <h1 className="text-xl font-semibold text-gray-800">Moore Maternal Care</h1>
             </div>
             
             <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.open('https://mooreobgyn.com/', '_blank')}
+                className="border-rose-deep text-rose-deep hover:bg-rose-deep hover:text-white"
+              >
+                Schedule Appointment
+              </Button>
+              
               <button className="relative p-2 text-gray-600 hover:text-rose-deep transition-colors">
                 <Bell className="text-lg" />
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-coral text-xs font-medium text-gray-700 rounded-full flex items-center justify-center">
@@ -159,6 +168,24 @@ export default function Home() {
 
           <PregnancyProgress pregnancyProfile={pregnancyProfile} />
         </div>
+
+        {/* Appointment Scheduling Section */}
+        <Card className="mb-8 border-rose-200 bg-gradient-to-r from-rose-50 to-purple-50">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Need to Schedule an Appointment?</h3>
+                <p className="text-gray-600 text-sm">Book your next prenatal visit with Moore OB/GYN</p>
+              </div>
+              <Button 
+                onClick={() => window.open('https://mooreobgyn.com/', '_blank')}
+                className="bg-rose-deep hover:bg-rose-deep/90 text-white"
+              >
+                Schedule Now
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Main Dashboard */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

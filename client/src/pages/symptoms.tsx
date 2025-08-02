@@ -129,11 +129,20 @@ export default function SymptomsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Symptom Tracking</h1>
-        <p className="text-gray-600">
-          Log your daily symptoms and mood to track patterns throughout your pregnancy.
-        </p>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Symptom Tracking</h1>
+          <p className="text-gray-600">
+            Log your daily symptoms and mood to track patterns throughout your pregnancy.
+          </p>
+        </div>
+        <Button 
+          variant="outline"
+          onClick={() => window.open('https://mooreobgyn.com/', '_blank')}
+          className="border-rose-deep text-rose-deep hover:bg-rose-deep hover:text-white"
+        >
+          Schedule Appointment
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

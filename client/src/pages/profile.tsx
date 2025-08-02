@@ -86,6 +86,14 @@ export default function Profile() {
             </div>
             
             <div className="flex items-center space-x-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.open('https://mooreobgyn.com/', '_blank')}
+                className="border-rose-deep text-rose-deep hover:bg-rose-deep hover:text-white"
+              >
+                Schedule Appointment
+              </Button>
               <img 
                 src={user?.profileImageUrl || "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150"} 
                 alt="Profile" 

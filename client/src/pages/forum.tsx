@@ -133,8 +133,16 @@ export default function Forum() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Community Forum</h1>
             <p className="text-gray-600">Connect with other expecting mothers and share experiences</p>
           </div>
+          <div className="flex items-center space-x-3">
+            <Button 
+              variant="outline"
+              onClick={() => window.open('https://mooreobgyn.com/', '_blank')}
+              className="border-rose-deep text-rose-deep hover:bg-rose-deep hover:text-white"
+            >
+              Schedule Appointment
+            </Button>
 
-          {isAuthenticated && (
+            {isAuthenticated && (
             <Dialog open={isNewThreadOpen} onOpenChange={setIsNewThreadOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-rose-deep hover:bg-rose-deep/90">
@@ -225,7 +233,8 @@ export default function Forum() {
                 </Form>
               </DialogContent>
             </Dialog>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
