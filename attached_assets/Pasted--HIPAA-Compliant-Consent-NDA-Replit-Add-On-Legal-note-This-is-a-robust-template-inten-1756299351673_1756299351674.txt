@@ -1,0 +1,71 @@
+# HIPAA-Compliant Consent + NDA & Replit Add-On
+
+> **Legal note:** This is a robust template intended to support HIPAA compliance and enforceable clickwrap. It does **not** replace advice from your counsel. Customize bracketed fields and verify state-specific rules (Florida telehealth, minor consent, 42 CFR Part 2 when applicable).
+
+---
+
+## 1) Clickwrap Consent + NDA (Patient-Facing Template)
+
+**Title:** Patient Authorization, Electronic Communication Consent, Telehealth Consent, & Mutual NDA (Non-Disclosure Agreement)
+
+**Effective Date:** \[YYYY-MM-DD]
+**Version:** \[vX.Y]
+
+**Covered Entity/Practice:** Cameron Clinics, \[PRACTICE\_ADDRESS], \[NPI if desired]
+**App/Service:** \[APP\_NAME] mobile/web application operated by Cameron Clinics
+**Contact for Privacy Questions/Complaints:** Privacy Officer – [privacy@cameronspine.com](mailto:privacy@cameronspine.com), \[PHONE]
+
+### A. Acknowledgment of Notice of Privacy Practices (NPP)
+
+By clicking **“I Agree”** below, I acknowledge that I have received or had access to the **Notice of Privacy Practices** (NPP) describing how my Protected Health Information (PHI) may be used and disclosed under HIPAA, and how I may exercise my rights. I understand I may request a paper or downloadable copy at any time.
+
+### B. Authorization for Use/Disclosure of PHI
+
+I authorize Cameron Clinics to use and disclose my PHI for the following purposes:
+
+1. **Treatment, Payment, and Health Care Operations (TPO).**
+2. **Electronic Communication via email and in-app tools.**
+3. **De-identification & Analytics.**
+4. **Care Team & Delegates.**
+
+**Not for Marketing/Sale of PHI:** This authorization **does not** permit marketing communications or sale of PHI. Those require separate, explicit authorization.
+
+**Right to Revoke:** I may revoke this authorization prospectively at any time via the app or by contacting [privacy@cameronspine.com](mailto:privacy@cameronspine.com).
+
+**Expiration:** This authorization remains in effect until the earliest of: (a) one year after my last active use of the app; (b) my written revocation; or (c) app account deletion.
+
+### C. Telehealth Consent
+
+I consent to receive services via telehealth. I understand technology may fail and I may request in-person alternatives.
+
+### D. Electronic Communications & Security
+
+I understand electronic transmission involves risks. Cameron Clinics implements safeguards but **no system is 100% secure**.
+
+### E. Sensitive Information (42 CFR Part 2 / Special Categories)
+
+If my care involves SUD records, HIV, or genetic data, I will be presented with **separate, specific consents** consistent with 42 CFR Part 2 and Florida law.
+
+### F. Patient Rights
+
+I understand I may exercise HIPAA rights including access, amendment, restrictions, and complaints to HHS without retaliation.
+
+### G. Data Retention & Portability
+
+Records are retained per law. I may request portable copies. Backups/logs may persist after account deletion.
+
+### H. Mutual Non-Disclosure Agreement (App NDA)
+
+As previously drafted (non-public app info protected, PHI excluded, term 3 years, equitable relief allowed).
+
+### I. Minors & Guardians
+
+If the user is a minor, guardian consent is required. Florida adolescent confidentiality laws may apply.
+
+### J. International Transfers
+
+If I access the app outside the U.S., my data may still be processed and stored in the U.S.
+
+### K. Incidents & Breach Notification
+
+Cameron Clinics will notify m

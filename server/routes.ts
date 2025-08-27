@@ -321,10 +321,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // QR Code generation route
   app.get('/api/qrcode', (async (req: any, res) => {
     try {
-      const { generateQRCode } = require('./qrcode.js');
+      console.log('QR code route accessed');
+      const QRCode = await import('qrcode');
       const url = req.query.url || `${req.protocol}://${req.get('host')}`;
       
-      const qrCodeSVG = await generateQRCode(url, {
+      console.log('Generating QR code for URL:', url);
+      
+      const qrCodeSVG = await QRCode.default.toString(url, {
         type: 'svg',
         width: 300,
         margin: 2,
@@ -335,10 +338,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.setHeader('Content-Type', 'image/svg+xml');
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
       res.send(qrCodeSVG);
     } catch (error) {
-      console.error("Error generating QR code:", error);
-      res.status(500).json({ message: "Failed to generate QR code" });
+      console.error("Error in QR code route:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({ message: "Failed to generate QR code", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   }) as RequestHandler);
 
