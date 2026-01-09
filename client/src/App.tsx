@@ -13,6 +13,7 @@ import SharePage from "./pages/share";
 import SharedSummaryPage from "./pages/shared-summary";
 import MessagesPage from "./pages/messages";
 import ForumPage from "./pages/forum";
+import SupplementsPage from "./pages/supplements";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/share" component={SharePage} />
       <Route path="/messages" component={MessagesPage} />
       <Route path="/forum" component={ForumPage} />
+      <Route path="/supplements" component={SupplementsPage} />
       <Route path="/shared/:token" component={SharedSummaryPage} />
       <Route component={NotFound} />
     </Switch>

@@ -13,7 +13,8 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { QRCodeDownload } from "@/components/QRCodeDownload";
-import { Bell, Plus, Weight, Check, Heart } from "lucide-react";
+import { Bell, Plus, Weight, Check, Heart, Pill } from "lucide-react";
+import { Link } from "wouter";
 import { useState } from "react";
 import type { PregnancyProfile } from "@shared/schema";
 
@@ -164,6 +165,28 @@ export default function Home() {
               >
 {t.bookAppointment}
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Supplements Section */}
+        <Card className="mb-8 border-rose-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-rose-soft to-rose-deep rounded-full flex items-center justify-center">
+                  <Pill className="text-white h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">{t.supplements}</h3>
+                  <p className="text-gray-600 text-sm">{t.supplementsDescription}</p>
+                </div>
+              </div>
+              <Link href="/supplements">
+                <Button className="bg-rose-deep hover:bg-rose-deep/90 text-white">
+                  {t.viewDetails}
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

@@ -126,6 +126,26 @@ export interface Translations {
   updated: string;
   created: string;
   deleted: string;
+
+  // Supplements
+  supplements: string;
+  supplementsTitle: string;
+  supplementsDescription: string;
+  searchSupplements: string;
+  cartTotal: string;
+  items: string;
+  checkout: string;
+  supplementsTab: string;
+  wellnessTab: string;
+  packsTab: string;
+  backorder: string;
+  weight: string;
+  addToCart: string;
+  wellnessSupport: string;
+  learnMore: string;
+  wellnessPack: string;
+  viewDetails: string;
+  emptyCart: string;
 }
 
 const translations: Record<Language, Translations> = {
@@ -165,6 +185,7 @@ const translations: Record<Language, Translations> = {
     currentWeek: 'Current Week',
     daysUntilDue: 'Days Until Due',
     quickActions: 'Quick Actions',
+    logSymptoms: 'Log Symptoms',
     logSymptomsAction: 'Log Symptoms',
     trackMood: 'Track Mood',
     recentActivity: 'Recent Activity',
@@ -252,6 +273,26 @@ const translations: Record<Language, Translations> = {
     updated: 'Updated successfully',
     created: 'Created successfully',
     deleted: 'Deleted successfully',
+
+    // Supplements
+    supplements: 'Supplements',
+    supplementsTitle: 'Wellness Supplements',
+    supplementsDescription: 'Prenatal vitamins and wellness products recommended for your pregnancy journey',
+    searchSupplements: 'Search supplements...',
+    cartTotal: 'Cart Total',
+    items: 'items',
+    checkout: 'Checkout',
+    supplementsTab: 'Supplements',
+    wellnessTab: 'Wellness',
+    packsTab: 'Packs',
+    backorder: 'Backorder',
+    weight: 'Weight',
+    addToCart: 'Add to Cart',
+    wellnessSupport: 'Wellness Support',
+    learnMore: 'Learn More',
+    wellnessPack: 'Wellness Pack',
+    viewDetails: 'View Details',
+    emptyCart: 'Your cart is empty',
   },
   es: {
     // Navigation
@@ -289,6 +330,7 @@ const translations: Record<Language, Translations> = {
     currentWeek: 'Semana Actual',
     daysUntilDue: 'Días Hasta el Parto',
     quickActions: 'Acciones Rápidas',
+    logSymptoms: 'Registrar Síntomas',
     logSymptomsAction: 'Registrar Síntomas',
     trackMood: 'Seguir Estado de Ánimo',
     recentActivity: 'Actividad Reciente',
@@ -376,6 +418,26 @@ const translations: Record<Language, Translations> = {
     updated: 'Actualizado exitosamente',
     created: 'Creado exitosamente',
     deleted: 'Eliminado exitosamente',
+
+    // Supplements
+    supplements: 'Suplementos',
+    supplementsTitle: 'Suplementos de Bienestar',
+    supplementsDescription: 'Vitaminas prenatales y productos de bienestar recomendados para tu embarazo',
+    searchSupplements: 'Buscar suplementos...',
+    cartTotal: 'Total del Carrito',
+    items: 'artículos',
+    checkout: 'Pagar',
+    supplementsTab: 'Suplementos',
+    wellnessTab: 'Bienestar',
+    packsTab: 'Paquetes',
+    backorder: 'Pedido Pendiente',
+    weight: 'Peso',
+    addToCart: 'Agregar al Carrito',
+    wellnessSupport: 'Apoyo al Bienestar',
+    learnMore: 'Saber Más',
+    wellnessPack: 'Paquete de Bienestar',
+    viewDetails: 'Ver Detalles',
+    emptyCart: 'Tu carrito está vacío',
   },
   fr: {
     // Navigation
@@ -413,6 +475,7 @@ const translations: Record<Language, Translations> = {
     currentWeek: 'Semaine Actuelle',
     daysUntilDue: 'Jours Jusqu\'à l\'Accouchement',
     quickActions: 'Actions Rapides',
+    logSymptoms: 'Enregistrer les Symptômes',
     logSymptomsAction: 'Enregistrer les Symptômes',
     trackMood: 'Suivre l\'Humeur',
     recentActivity: 'Activité Récente',
@@ -500,6 +563,26 @@ const translations: Record<Language, Translations> = {
     updated: 'Mis à jour avec succès',
     created: 'Créé avec succès',
     deleted: 'Supprimé avec succès',
+
+    // Supplements
+    supplements: 'Suppléments',
+    supplementsTitle: 'Suppléments de Bien-être',
+    supplementsDescription: 'Vitamines prénatales et produits de bien-être recommandés pour votre grossesse',
+    searchSupplements: 'Rechercher des suppléments...',
+    cartTotal: 'Total du Panier',
+    items: 'articles',
+    checkout: 'Payer',
+    supplementsTab: 'Suppléments',
+    wellnessTab: 'Bien-être',
+    packsTab: 'Packs',
+    backorder: 'En Attente',
+    weight: 'Poids',
+    addToCart: 'Ajouter au Panier',
+    wellnessSupport: 'Soutien au Bien-être',
+    learnMore: 'En Savoir Plus',
+    wellnessPack: 'Pack Bien-être',
+    viewDetails: 'Voir les Détails',
+    emptyCart: 'Votre panier est vide',
   },
 };
 
