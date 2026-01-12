@@ -1,7 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { attachRealtime } from "./realtime.js";
+import { registerPhiRoutes } from "./phiProxy";
 import authRoutes from "./auth.js";
 import profileRoutes from "./profile.js";
 import symptomsRoutes from "./symptoms.js";
@@ -11,8 +13,12 @@ import educationRoutes from "./education.js";
 import forumRoutes from "./forum.js";
 
 const app = express();
+
+app.disable('x-powered-by');
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser(process.env.SESSION_SECRET));
 
 // Add API routes
 app.use("/api/auth", authRoutes);
@@ -22,6 +28,8 @@ app.use("/api/share", shareRoutes);
 app.use("/api/messages", messagesRoutes);
 app.use("/api/education", educationRoutes);
 app.use("/api/forum", forumRoutes);
+
+registerPhiRoutes(app);
 
 app.use((req, res, next) => {
   const start = Date.now();
