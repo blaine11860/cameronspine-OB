@@ -56,6 +56,21 @@ Preferred communication style: Simple, everyday language.
   - Multilingual support for QR code interface
   - Rose-themed QR codes matching platform branding
 
+✓ **Secure PHI Backend Proxy Pattern (January 2026):**
+  - PHI (Protected Health Information) proxy routes for secure data forwarding to AWS backend
+  - AWS Cognito OAuth integration for HIPAA-compliant authentication flow
+  - HTTP-only signed cookies for secure token storage (access_token, id_token, refresh_token)
+  - Protected PHI endpoints: /phi/intake, /phi/summary, /phi/records, /phi/appointments
+  - requirePhiAuth middleware for PHI route protection
+  - Safe logging (safeLog) that never logs PHI data
+  - Environment variables required: COGNITO_DOMAIN, COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, COGNITO_REDIRECT_URI, COGNITO_LOGOUT_REDIRECT_URI, AWS_PHI_API_BASE_URL, SESSION_SECRET
+
+✓ **Supplements E-Commerce Section:**
+  - Product catalog with tabs: Supplements, Wellness, Packs
+  - Shopping cart functionality with add/remove items
+  - Xymogen API credentials configured (XYMOGEN_USERNAME, XYMOGEN_PASSWORD)
+  - Checkout links to https://mooreobgyn.com/
+
 ## System Architecture
 
 ### Frontend Architecture
