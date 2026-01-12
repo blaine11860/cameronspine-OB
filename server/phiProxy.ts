@@ -47,6 +47,49 @@ export const requirePhiAuth: RequestHandler = (req: Request, res: Response, next
   next();
 };
 
+function decodeJwtPayload(token: string): any {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = Buffer.from(parts[1], 'base64').toString('utf-8');
+    return JSON.parse(payload);
+  } catch {
+    return null;
+  }
+}
+
+export function requireRole(requiredRoles: string[]): RequestHandler {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const token = (req as any).signedCookies?.access_token || (req as any).cookies?.access_token;
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const decoded = decodeJwtPayload(token);
+    if (!decoded) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const groups: string[] = decoded['cognito:groups'] || [];
+    const hasRole = groups.some((g: string) => requiredRoles.includes(g));
+    
+    if (!hasRole) {
+      console.log(JSON.stringify({
+        type: 'access_denied',
+        userSub: decoded.sub,
+        groups,
+        requiredRoles,
+        path: req.path,
+        timestamp: new Date().toISOString()
+      }));
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    (req as any).user = decoded;
+    next();
+  };
+}
+
 async function proxyToPhiApi(
   req: Request, 
   res: Response, 
