@@ -35,14 +35,16 @@ app.get('/', checkAuth, (req, res) => {
 app.get('/login', (req, res) => {
     const nonce = generators.nonce();
     const state = generators.state();
+
     req.session.nonce = nonce;
     req.session.state = state;
 
     const authUrl = client.authorizationUrl({
-        scope: 'openid profile email',
-        state,
-        nonce
+        scope: 'phone openid email',
+        state: state,
+        nonce: nonce,
     });
+
     res.redirect(authUrl);
 });
 
