@@ -1,0 +1,211 @@
+// index.js (Replit)
+
+const express = require('express');
+const axios = require('axios');
+const cookieParser = require('cookie-parser');
+const qs = require('querystring');
+
+const app = express();
+
+app.use(express.json());
+app.use(cookieParser(process.env.SESSION_SECRET));
+
+// --- Security middlewares (minimal example) ---
+app.disable('x-powered-by');
+
+// Very important: never log full bodies (could contain PHI once we wire forms)
+const safeLog = (...args) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[SAFE_LOG]', ...args);
+  }
+};
+
+// ---------- OAUTH WITH COGNITO (NON-PHI) ---------- //
+
+const {
+  COGNITO_DOMAIN,
+  COGNITO_CLIENT_ID,
+  COGNITO_CLIENT_SECRET,
+  COGNITO_REDIRECT_URI,
+  COGNITO_LOGOUT_REDIRECT_URI,
+  AWS_PHI_API_BASE_URL
+} = process.env;
+
+// 1) Start login
+app.get('/auth/login', (req, res) => {
+  const loginUrl = `${COGNITO_DOMAIN}/oauth2/authorize?` + qs.stringify({
+    client_id: COGNITO_CLIENT_ID,
+    response_type: 'code',
+    redirect_uri: COGNITO_REDIRECT_URI,
+    scope: 'openid profile email'
+  });
+
+  res.redirect(loginUrl);
+});
+
+// 2) Handle callback and exchange code for tokens
+app.get('/auth/callback', async (req, res) => {
+  const code = req.query.code;
+  if (!code) {
+    return res.status(400).send('Missing code');
+  }
+
+  try {
+    const tokenUrl = `${COGNITO_DOMAIN}/oauth2/token`;
+
+    const authHeader = Buffer.from(
+      `${COGNITO_CLIENT_ID}:${COGNITO_CLIENT_SECRET}`
+    ).toString('base64');
+
+    const tokenResponse = await axios.post(
+      tokenUrl,
+      qs.stringify({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: COGNITO_REDIRECT_URI
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${authHeader}`
+        }
+      }
+    );
+
+    const { access_token, id_token, refresh_token, expires_in } = tokenResponse.data;
+
+    // Store tokens in HTTP-only cookies (NON-PHI, but still sensitive)
+    res.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: expires_in * 1000
+    });
+
+    res.cookie('id_token', id_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: expires_in * 1000
+    });
+
+    if (refresh_token) {
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax'
+      });
+    }
+
+    // Redirect to app dashboard (NON-PHI UI)
+    res.redirect('/dashboard');
+  } catch (err) {
+    safeLog('Error exchanging code for tokens:', err.message);
+    return res.status(500).send('Auth error');
+  }
+});
+
+// 3) Simple logout – clear cookies and redirect through Cognito
+app.get('/auth/logout', (req, res) => {
+  res.clearCookie('access_token');
+  res.clearCookie('id_token');
+  res.clearCookie('refresh_token');
+
+  const logoutUrl = `${COGNITO_DOMAIN}/logout?` + qs.stringify({
+    client_id: COGNITO_CLIENT_ID,
+    logout_uri: COGNITO_LOGOUT_REDIRECT_URI
+  });
+
+  res.redirect(logoutUrl);
+});
+
+// Middleware to require auth for PHI-related UI routes
+function requireAuth(req, res, next) {
+  const token = req.signedCookies?.access_token || req.cookies?.access_token;
+  if (!token) return res.status(401).send('Unauthorized');
+  next();
+}
+
+// ---------- NON-PHI ROUTES (SAFE FOR REPLIT) ---------- //
+
+// Example: public info
+app.get('/api/weather', async (req, res) => {
+  // Call OpenWeather or other NON-PHI APIs here
+  // Make sure queries are never patient-specific.
+  res.json({ ok: true, message: 'Weather endpoint placeholder' });
+});
+
+// Example: dashboard UI – serve HTML/JS
+app.get('/dashboard', requireAuth, (req, res) => {
+  // Render or send your frontend bundle (no PHI embedded)
+  res.send('<h1>Dashboard</h1><p>All PHI fetched via backend API only.</p>');
+});
+
+// ---------- PHI PROXY ROUTES (FORWARD TO AWS) ---------- //
+
+// Helper to proxy a request to AWS PHI API
+async function proxyToPhiApi(req, res, path, method = 'post') {
+  const accessToken = req.signedCookies?.access_token || req.cookies?.access_token;
+  if (!accessToken) return res.status(401).send('Unauthorized');
+
+  try {
+    const url = `${AWS_PHI_API_BASE_URL}${path}`;
+
+    // IMPORTANT: do NOT log req.body; it may contain PHI.
+    const axiosConfig = {
+      method,
+      url,
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      data: req.body
+    };
+
+    const response = await axios(axiosConfig);
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    // Only log high-level info, never body contents
+    safeLog('Error proxying to PHI API:', {
+      path,
+      status: err.response?.status,
+      message: err.message
+    });
+    res.status(500).send('Backend error');
+  }
+}
+
+// Example: patient intake form submission (PHI)
+// Frontend posts to Replit, Replit forwards to AWS
+app.post('/phi/intake', requireAuth, (req, res) => {
+  // req.body contains PHI – do not touch besides forwarding
+  return proxyToPhiApi(req, res, '/phi/intake', 'post');
+});
+
+// Example: get patient clinical summary (PHI)
+app.get('/phi/summary', requireAuth, async (req, res) => {
+  // We can forward query params, but don’t log them.
+  const accessToken = req.signedCookies?.access_token || req.cookies?.access_token;
+  if (!accessToken) return res.status(401).send('Unauthorized');
+
+  try {
+    const url = `${AWS_PHI_API_BASE_URL}/phi/summary`;
+    const response = await axios.get(url, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    safeLog('Error getting PHI summary:', {
+      status: err.response?.status,
+      message: err.message
+    });
+    res.status(500).send('Backend error');
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  safeLog(`Replit NON-PHI server listening on port ${PORT}`);
+});
