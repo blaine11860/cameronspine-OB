@@ -151,12 +151,14 @@ export function registerPhiRoutes(app: any) {
 
       const { access_token, id_token, refresh_token, expires_in } = tokenResponse.data;
 
+      const MAX_SESSION_MS = 30 * 60 * 1000; // 30 minutes max for security
+
       const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax' as const,
         signed: !!SESSION_SECRET,
-        maxAge: expires_in * 1000
+        maxAge: Math.min(expires_in * 1000, MAX_SESSION_MS)
       };
 
       res.cookie('access_token', access_token, cookieOptions);
@@ -165,7 +167,7 @@ export function registerPhiRoutes(app: any) {
       if (refresh_token) {
         res.cookie('refresh_token', refresh_token, {
           ...cookieOptions,
-          maxAge: undefined
+          maxAge: MAX_SESSION_MS
         });
       }
 
