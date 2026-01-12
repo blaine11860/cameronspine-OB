@@ -1,0 +1,118 @@
+// phi-backend/index.js (AWS)
+
+// npm install express jwk-to-pem jsonwebtoken axios
+
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const axios = require('axios');
+const jwkToPem = require('jwk-to-pem');
+
+const app = express();
+app.use(express.json());
+
+// Cognito config
+const COGNITO_REGION = process.env.COGNITO_REGION;
+const COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
+const COGNITO_ISSUER = `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/${COGNITO_USER_POOL_ID}`;
+
+let jwksCache = null;
+
+// Fetch JWKs for JWT verification
+async function getJwks() {
+  if (jwksCache) return jwksCache;
+  const url = `${COGNITO_ISSUER}/.well-known/jwks.json`;
+  const { data } = await axios.get(url);
+  jwksCache = data;
+  return jwksCache;
+}
+
+// Middleware to validate Cognito JWT
+async function authenticate(req, res, next) {
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.replace('Bearer ', '');
+
+  if (!token) {
+    return res.status(401).json({ error: 'Missing token' });
+  }
+
+  try {
+    const decodedHeader = jwt.decode(token, { complete: true });
+    if (!decodedHeader || !decodedHeader.header.kid) {
+      return res.status(401).json({ error: 'Invalid token header' });
+    }
+
+    const jwks = await getJwks();
+    const key = jwks.keys.find(k => k.kid === decodedHeader.header.kid);
+    if (!key) {
+      return res.status(401).json({ error: 'Invalid token key' });
+    }
+
+    const pem = jwkToPem(key);
+
+    const payload = jwt.verify(token, pem, {
+      issuer: COGNITO_ISSUER
+    });
+
+    // Attach user info to request (careful: this is PHI if tied to identity)
+    req.user = payload;
+    next();
+  } catch (err) {
+    console.error('JWT verification error:', err.message);
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+// Dummy PHI storage (replace with RDS or other)
+async function savePatientIntake(userSub, intakeData) {
+  // userSub is Cognito's user ID (sub)
+  // intakeData contains PHI: name, email, phone, DOB, address, insurance ID,
+  // diagnoses, meds, labs, symptoms, goals, etc.
+
+  // In real code:
+  // - Use parameterized queries
+  // - Encrypt sensitive columns (or encrypt before writing)
+  // - Log ONLY minimal metadata (no PHI)
+
+  console.log('Saving intake for user:', userSub);
+  return { success: true };
+}
+
+// PHI endpoint: intake form
+app.post('/phi/intake', authenticate, async (req, res) => {
+  const userSub = req.user.sub;
+
+  const intakeData = req.body;
+
+  // Basic server-side validation (no logging of full body)
+  if (!intakeData || !intakeData.name || !intakeData.dob) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const result = await savePatientIntake(userSub, intakeData);
+    res.json({ success: true, result });
+  } catch (err) {
+    console.error('Error saving intake:', err.message);
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
+// PHI endpoint: clinical summary
+app.get('/phi/summary', authenticate, async (req, res) => {
+  const userSub = req.user.sub;
+
+  // Replace with DB query fetching PHI for this userSub
+  // Return minimal necessary info.
+  const exampleSummary = {
+    name: 'REDACTED',
+    diagnoses: ['Example diagnosis'],
+    meds: ['Example medication']
+  };
+
+  res.json(exampleSummary);
+});
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`PHI backend listening on ${PORT}`);
+});
