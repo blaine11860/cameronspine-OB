@@ -58,6 +58,20 @@ function decodeJwtPayload(token: string): any {
   }
 }
 
+export function auditLog(eventType: string, req: Request, extra: Record<string, any> = {}) {
+  const user = (req as any).user;
+  const entry = {
+    eventType,
+    userSub: user?.sub,
+    groups: user?.['cognito:groups'] || [],
+    path: req.path,
+    method: req.method,
+    timestamp: new Date().toISOString(),
+    ...extra
+  };
+  console.log(JSON.stringify(entry));
+}
+
 export function requireRole(requiredRoles: string[]): RequestHandler {
   return (req: Request, res: Response, next: NextFunction) => {
     const token = (req as any).signedCookies?.access_token || (req as any).cookies?.access_token;
@@ -94,7 +108,8 @@ async function proxyToPhiApi(
   req: Request, 
   res: Response, 
   path: string, 
-  method: 'get' | 'post' | 'put' | 'delete' = 'post'
+  method: 'get' | 'post' | 'put' | 'delete' = 'post',
+  eventType?: string
 ) {
   const accessToken = (req as any).signedCookies?.access_token || (req as any).cookies?.access_token;
   if (!accessToken) {
@@ -122,6 +137,11 @@ async function proxyToPhiApi(
     }
 
     const response = await axios(axiosConfig);
+    
+    if (eventType) {
+      auditLog(eventType, req, { success: true, status: response.status });
+    }
+    
     res.status(response.status).json(response.data);
   } catch (err: any) {
     safeLog('Error proxying to PHI API:', {
@@ -129,6 +149,10 @@ async function proxyToPhiApi(
       status: err.response?.status,
       message: err.message
     });
+    
+    if (eventType) {
+      auditLog(`${eventType}_error`, req, { error: err.message, status: err.response?.status });
+    }
     
     if (err.response?.status === 401) {
       return res.status(401).json({ error: 'Session expired' });
@@ -246,27 +270,27 @@ export function registerPhiRoutes(app: any) {
   }) as RequestHandler);
 
   app.post('/phi/intake', requirePhiAuth, requireRole(['clinician']), (async (req: Request, res: Response) => {
-    return proxyToPhiApi(req, res, '/phi/intake', 'post');
+    return proxyToPhiApi(req, res, '/phi/intake', 'post', 'phi_intake_saved');
   }) as RequestHandler);
 
   app.get('/phi/summary', requirePhiAuth, requireRole(['patient', 'clinician']), (async (req: Request, res: Response) => {
-    return proxyToPhiApi(req, res, '/phi/summary', 'get');
+    return proxyToPhiApi(req, res, '/phi/summary', 'get', 'phi_summary_viewed');
   }) as RequestHandler);
 
   app.get('/phi/records', requirePhiAuth, requireRole(['patient', 'clinician']), (async (req: Request, res: Response) => {
-    return proxyToPhiApi(req, res, '/phi/records', 'get');
+    return proxyToPhiApi(req, res, '/phi/records', 'get', 'phi_records_viewed');
   }) as RequestHandler);
 
   app.post('/phi/records', requirePhiAuth, requireRole(['clinician']), (async (req: Request, res: Response) => {
-    return proxyToPhiApi(req, res, '/phi/records', 'post');
+    return proxyToPhiApi(req, res, '/phi/records', 'post', 'phi_records_created');
   }) as RequestHandler);
 
   app.get('/phi/appointments', requirePhiAuth, requireRole(['patient', 'clinician']), (async (req: Request, res: Response) => {
-    return proxyToPhiApi(req, res, '/phi/appointments', 'get');
+    return proxyToPhiApi(req, res, '/phi/appointments', 'get', 'phi_appointments_viewed');
   }) as RequestHandler);
 
   app.post('/phi/appointments', requirePhiAuth, requireRole(['patient', 'clinician']), (async (req: Request, res: Response) => {
-    return proxyToPhiApi(req, res, '/phi/appointments', 'post');
+    return proxyToPhiApi(req, res, '/phi/appointments', 'post', 'phi_appointments_created');
   }) as RequestHandler);
 
   safeLog('PHI proxy routes registered');
