@@ -293,5 +293,15 @@ export function registerPhiRoutes(app: any) {
     return proxyToPhiApi(req, res, '/phi/appointments', 'post', 'phi_appointments_created');
   }) as RequestHandler);
 
+  app.post('/phi/compute-risk-score', requirePhiAuth, requireRole(['patient', 'clinician']), (async (req: Request, res: Response) => {
+    const { symptoms } = req.body;
+
+    if (!symptoms) {
+      return res.status(400).json({ error: 'Missing symptoms' });
+    }
+
+    return proxyToPhiApi(req, res, '/phi/compute-risk-score', 'post', 'risk_score_computed');
+  }) as RequestHandler);
+
   safeLog('PHI proxy routes registered');
 }
