@@ -62,8 +62,12 @@ Preferred communication style: Simple, everyday language.
   - HTTP-only signed cookies for secure token storage (access_token, id_token, refresh_token)
   - Protected PHI endpoints: /phi/intake, /phi/summary, /phi/records, /phi/appointments
   - requirePhiAuth middleware for PHI route protection
-  - Safe logging (safeLog) that never logs PHI data
-  - Environment variables required: COGNITO_DOMAIN, COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, COGNITO_REDIRECT_URI, COGNITO_LOGOUT_REDIRECT_URI, AWS_PHI_API_BASE_URL, SESSION_SECRET
+  - requireRole middleware for Cognito group-based access control (patient, clinician)
+  - Safe logging (safeLog) with PHI redaction (emails, phones, SSNs, DOBs)
+  - Comprehensive audit logging for all PHI operations (no PHI in logs)
+  - 30-minute maximum session timeout for security
+  - Field-level AES-256-GCM encryption for PHI at rest (server/crypto/phiEncryption.ts)
+  - Environment variables required: COGNITO_DOMAIN, COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, COGNITO_REDIRECT_URI, COGNITO_LOGOUT_REDIRECT_URI, AWS_PHI_API_BASE_URL, SESSION_SECRET, FIELD_ENCRYPTION_KEY (optional, 32-byte base64)
 
 ✓ **Supplements E-Commerce Section:**
   - Product catalog with tabs: Supplements, Wellness, Packs

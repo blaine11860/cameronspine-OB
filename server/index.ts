@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { attachRealtime } from "./realtime.js";
 import { registerPhiRoutes, safeLog } from "./phiProxy";
+import { initializeEncryption, isEncryptionEnabled } from "./crypto/phiEncryption";
 import authRoutes from "./auth.js";
 import profileRoutes from "./profile.js";
 import symptomsRoutes from "./symptoms.js";
@@ -29,6 +30,7 @@ app.use("/api/messages", messagesRoutes);
 app.use("/api/education", educationRoutes);
 app.use("/api/forum", forumRoutes);
 
+initializeEncryption();
 registerPhiRoutes(app);
 
 app.use((req, res, next) => {
