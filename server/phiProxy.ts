@@ -245,50 +245,27 @@ export function registerPhiRoutes(app: any) {
     });
   }) as RequestHandler);
 
-  app.post('/phi/intake', requirePhiAuth, (async (req: Request, res: Response) => {
+  app.post('/phi/intake', requirePhiAuth, requireRole(['clinician']), (async (req: Request, res: Response) => {
     return proxyToPhiApi(req, res, '/phi/intake', 'post');
   }) as RequestHandler);
 
-  app.get('/phi/summary', requirePhiAuth, (async (req: Request, res: Response) => {
-    const accessToken = (req as any).signedCookies?.access_token || (req as any).cookies?.access_token;
-    if (!accessToken) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    if (!AWS_PHI_API_BASE_URL) {
-      return res.status(503).json({ error: 'PHI service not configured' });
-    }
-
-    try {
-      const url = `${AWS_PHI_API_BASE_URL}/phi/summary`;
-      const response = await axios.get(url, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-      res.status(response.status).json(response.data);
-    } catch (err: any) {
-      safeLog('Error getting PHI summary:', {
-        status: err.response?.status,
-        message: err.message
-      });
-      res.status(500).json({ error: 'Backend error' });
-    }
+  app.get('/phi/summary', requirePhiAuth, requireRole(['patient', 'clinician']), (async (req: Request, res: Response) => {
+    return proxyToPhiApi(req, res, '/phi/summary', 'get');
   }) as RequestHandler);
 
-  app.get('/phi/records', requirePhiAuth, (async (req: Request, res: Response) => {
+  app.get('/phi/records', requirePhiAuth, requireRole(['patient', 'clinician']), (async (req: Request, res: Response) => {
     return proxyToPhiApi(req, res, '/phi/records', 'get');
   }) as RequestHandler);
 
-  app.post('/phi/records', requirePhiAuth, (async (req: Request, res: Response) => {
+  app.post('/phi/records', requirePhiAuth, requireRole(['clinician']), (async (req: Request, res: Response) => {
     return proxyToPhiApi(req, res, '/phi/records', 'post');
   }) as RequestHandler);
 
-  app.get('/phi/appointments', requirePhiAuth, (async (req: Request, res: Response) => {
+  app.get('/phi/appointments', requirePhiAuth, requireRole(['patient', 'clinician']), (async (req: Request, res: Response) => {
     return proxyToPhiApi(req, res, '/phi/appointments', 'get');
   }) as RequestHandler);
 
-  app.post('/phi/appointments', requirePhiAuth, (async (req: Request, res: Response) => {
+  app.post('/phi/appointments', requirePhiAuth, requireRole(['patient', 'clinician']), (async (req: Request, res: Response) => {
     return proxyToPhiApi(req, res, '/phi/appointments', 'post');
   }) as RequestHandler);
 
