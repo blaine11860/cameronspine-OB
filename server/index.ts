@@ -3,7 +3,7 @@ import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { attachRealtime } from "./realtime.js";
-import { registerPhiRoutes } from "./phiProxy";
+import { registerPhiRoutes, safeLog } from "./phiProxy";
 import authRoutes from "./auth.js";
 import profileRoutes from "./profile.js";
 import symptomsRoutes from "./symptoms.js";
@@ -69,10 +69,8 @@ app.use((req, res, next) => {
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
+    safeLog('Unhandled error:', err.message);
+    res.status(status).send('Server error');
   });
 
   // importantly only setup vite in development and after

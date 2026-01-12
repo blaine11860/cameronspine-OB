@@ -12,9 +12,30 @@ const {
   SESSION_SECRET
 } = process.env;
 
-const safeLog = (...args: any[]) => {
+function redactPotentialPhi(input: any): any {
+  if (!input) return input;
+  let str = String(input);
+  str = str.replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[REDACTED_EMAIL]');
+  str = str.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[REDACTED_PHONE]');
+  str = str.replace(/\b\d{9,}\b/g, '[REDACTED_ID]');
+  str = str.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[REDACTED_SSN]');
+  str = str.replace(/\b(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}\b/g, '[REDACTED_DOB]');
+  return str;
+}
+
+export const safeLog = (...args: any[]) => {
   if (process.env.NODE_ENV !== 'production') {
-    console.log('[SAFE_LOG]', ...args);
+    const sanitized = args.map(a => {
+      if (typeof a === 'object' && a !== null) {
+        try {
+          return redactPotentialPhi(JSON.stringify(a));
+        } catch {
+          return '[OBJECT]';
+        }
+      }
+      return redactPotentialPhi(a);
+    });
+    console.log('[SAFE_LOG]', ...sanitized);
   }
 };
 
