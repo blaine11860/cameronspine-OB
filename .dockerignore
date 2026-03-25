@@ -1,0 +1,10 @@
+.git
+.github
+node_modules
+dist
+*.log
+.env
+.env.*
+!.env.example
+attached_assets
+aws/README.md

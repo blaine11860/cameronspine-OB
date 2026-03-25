@@ -13,6 +13,11 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health-check endpoint used by the AWS ALB target group
+  app.get('/api/health', (_req, res) => {
+    res.json({ status: 'ok' });
+  });
+
   // Mock user ID for demo purposes
   const DEMO_USER_ID = "demo-user-123";
 
