@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Moore Maternal Care",
+    "slug": "moore-maternal-care",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#fff1f2"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mooreobgyn.maternalcare"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#fff1f2"
+      },
+      "package": "com.mooreobgyn.maternalcare"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
